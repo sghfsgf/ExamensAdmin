@@ -150,13 +150,16 @@ function sauvegarder(){
         let valeurs = {};
 
         for(let j = 0; j < maxCols; j++){
-
             valeurs[j+1] = rows[i].cells[j].innerText;
         }
 
         requests.push(fetch(API, {
-            method:"POST",
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
             body: JSON.stringify({
+                mode: "admin",
                 feuille: feuille,
                 ligne: i + 1,
                 valeurs: valeurs
@@ -170,12 +173,12 @@ function sauvegarder(){
         document.getElementById("status").innerText =
         "✔ Sauvegarde réussie";
     })
-    .catch(() => {
+    .catch((err) => {
 
+        console.error(err);
         document.getElementById("status").innerText =
         "❌ Erreur sauvegarde";
     });
-
 }
 
 </script>
