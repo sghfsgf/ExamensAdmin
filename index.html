@@ -153,34 +153,40 @@ function sauvegarder(){
             valeurs[j+1] = rows[i].cells[j].innerText;
         }
 
-        requests.push(fetch(API, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                mode: "admin",
-                feuille: feuille,
-                ligne: i + 1,
-                valeurs: valeurs
+        requests.push(
+            fetch(API, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    mode: "admin",
+                    feuille: feuille,
+                    ligne: i + 1,
+                    valeurs: valeurs
+                })
             })
-        }));
+            .then(r => r.text())   // 🔥 IMPORTANT
+            .then(txt => {
+                console.log("RESPONSE:", txt);
+                return txt;
+            })
+        );
     }
 
     Promise.all(requests)
     .then(() => {
-
         document.getElementById("status").innerText =
-        "✔ Sauvegarde réussie";
+        "✔ Sauvegarde OK";
     })
-    .catch((err) => {
+    .catch(err => {
 
-        console.error(err);
+        console.error("ERROR:", err);
+
         document.getElementById("status").innerText =
-        "❌ Erreur sauvegarde";
+        "❌ Erreur sauvegarde (voir console)";
     });
 }
-
 </script>
 
 </body>
