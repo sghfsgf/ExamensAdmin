@@ -98,19 +98,24 @@ function charger(){
 
     const feuille = document.getElementById("feuille").value;
 
-    fetch(API + "?feuille=" + feuille)
+    fetch(API + "?mode=admin&feuille=" + encodeURIComponent(feuille))
     .then(r => r.json())
     .then(data => {
+
+        if (data.status !== "success") {
+            document.getElementById("status").innerText =
+            "❌ " + data.message;
+            return;
+        }
 
         const maxCols = CONFIG[feuille];
         let html = "";
 
-        data.forEach(row => {
+        data.data.forEach(row => {
 
             html += "<tr>";
 
             for(let j = 0; j < maxCols; j++){
-
                 html += `<td contenteditable="true">${row[j] || ""}</td>`;
             }
 
@@ -121,10 +126,13 @@ function charger(){
 
         document.getElementById("status").innerText =
         "✔ Données chargées";
+    })
+    .catch(err => {
+        console.error(err);
+        document.getElementById("status").innerText =
+        "❌ Erreur chargement API";
     });
-
 }
-
 
 // ==========================
 // SAUVEGARDER
