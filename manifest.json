@@ -1,11 +1,16 @@
 {
   "name": "ExamensAdmin",
   "short_name": "Admin",
-  "description": "ExamensAdmin",
-  "start_url": "./index.html",
+  "description": "Gestion des examens et surveillances",
+
+  "start_url": "/ExamensAdmin/",
+  "scope": "/ExamensAdmin/",
+
   "display": "standalone",
+
   "background_color": "#ffffff",
   "theme_color": "#ff6600",
+
   "icons": [
     {
       "src": "image_calendriers.png",
@@ -19,6 +24,3 @@
     }
   ]
 }
-
-
-
