@@ -143,48 +143,49 @@ function sauvegarder(){
     const rows = document.getElementById("tableau").rows;
     const maxCols = CONFIG[feuille];
 
-    let requests = [];
+    let dataToSend = [];
 
     for(let i = 0; i < rows.length; i++){
 
         let valeurs = {};
 
         for(let j = 0; j < maxCols; j++){
-            valeurs[j+1] = rows[i].cells[j].innerText;
+            valeurs[j + 1] = rows[i].cells[j].innerText;
         }
 
-        requests.push(
-            fetch(API, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    mode: "admin",
-                    feuille: feuille,
-                    ligne: i + 1,
-                    valeurs: valeurs
-                })
-            })
-            .then(r => r.text())   // 🔥 IMPORTANT
-            .then(txt => {
-                console.log("RESPONSE:", txt);
-                return txt;
-            })
-        );
+        dataToSend.push({
+            ligne: i + 1,
+            valeurs: valeurs
+        });
     }
 
-    Promise.all(requests)
-    .then(() => {
-        document.getElementById("status").innerText =
-        "✔ Sauvegarde OK";
+    fetch(API, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            mode: "admin",
+            feuille: feuille,
+            data: dataToSend
+        })
+    })
+    .then(r => r.json())
+    .then(res => {
+
+        if(res.status === "success"){
+            document.getElementById("status").innerText =
+            "✔ Sauvegarde réussie";
+        } else {
+            document.getElementById("status").innerText =
+            "❌ " + (res.message || "Erreur sauvegarde");
+        }
+
     })
     .catch(err => {
-
-        console.error("ERROR:", err);
-
+        console.error(err);
         document.getElementById("status").innerText =
-        "❌ Erreur sauvegarde (voir console)";
+        "❌ Erreur réseau";
     });
 }
 </script>
