@@ -1,7 +1,7 @@
 {
-  "name": "Admin Planification",
+  "name": "ExamensAdmin",
   "short_name": "Admin",
-  "description": "Tableau de bord pour le suivi des examens",
+  "description": "ExamensAdmin",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",
