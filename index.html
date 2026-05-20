@@ -55,6 +55,29 @@ td[contenteditable="true"]{
 <body>
 
 <h1>📊 ExamensAdmin</h1>
+    <div id="dashboard" style="
+    display:flex;
+    gap:15px;
+    margin:15px 0;
+    flex-wrap:wrap;
+">
+
+    <div style="background:white;padding:10px 15px;border-radius:8px;min-width:180px;">
+        👨‍🏫 Enseignants<br>
+        <b id="stat_ens">-</b>
+    </div>
+
+    <div style="background:white;padding:10px 15px;border-radius:8px;min-width:180px;">
+        📅 Jours actifs<br>
+        <b id="stat_jours">-</b>
+    </div>
+
+    <div style="background:white;padding:10px 15px;border-radius:8px;min-width:180px;">
+        📊 Taux remplissage<br>
+        <b id="stat_taux">-</b>
+    </div>
+
+</div>
 
 <select id="feuille">
     <option value="Departements">Departements</option>
@@ -205,6 +228,61 @@ function sauvegarder(){
         "❌ Erreur réseau";
     });
 }
+    // ==========================
+// TABLEAU DE BORD
+// ==========================
+function chargerDashboard(){
+
+    fetch(API + "?mode=admin&feuille=Departements")
+    .then(r => r.json())
+    .then(dep => {
+
+        if(dep.status !== "success") return;
+
+        const enseignants = dep.data.length - 1;
+
+        document.getElementById("stat_ens").innerText =
+        enseignants;
+
+    });
+
+    fetch(API + "?mode=admin&feuille=Jours")
+    .then(r => r.json())
+    .then(jours => {
+
+        if(jours.status !== "success") return;
+
+        let actifs = 0;
+
+        jours.data.forEach((r,i) => {
+            if(i > 0 && (r[1] || "").toLowerCase() === "oui"){
+                actifs++;
+            }
+        });
+
+        document.getElementById("stat_jours").innerText =
+        actifs;
+
+    });
+
+    fetch(API + "?mode=admin&feuille=Surveillances")
+    .then(r => r.json())
+    .then(surv => {
+
+        if(surv.status !== "success") return;
+
+        const total = surv.data.length - 1;
+
+        const max = 100; // base simple (tu peux améliorer après)
+
+        let taux = (total / max) * 100;
+
+        document.getElementById("stat_taux").innerText =
+        Math.min(100, Math.round(taux)) + "%";
+
+    });
+}
+    chargerDashboard();
 </script>
 
 </body>
