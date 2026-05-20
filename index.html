@@ -16,38 +16,24 @@ body{
     background:#f4f4f4;
 }
 
-/* ================= MENU ================= */
+/* MENU */
 #menuPrincipal{
-
     background:#ffcc80;
-
     padding:15px;
-
     border-radius:10px;
-
     display:flex;
-
     gap:20px;
-
-    justify-content:flex-start; /* gauche */
-
+    justify-content:flex-start;
     align-items:center;
 }
 
 #menuPrincipal span{
-
     background:#ff9800;
-
     color:white;
-
     font-size:22px;
-
     font-weight:bold;
-
     padding:8px 15px;
-
     border-radius:8px;
-
     cursor:pointer;
 }
 
@@ -55,7 +41,7 @@ body{
     background:#f57c00;
 }
 
-/* ================= TABLE ================= */
+/* TABLE */
 table{
     width:100%;
     border-collapse:collapse;
@@ -79,16 +65,13 @@ td[contenteditable="true"]{
 
 <body>
 
-<!-- ================= MENU PRINCIPAL ================= -->
+<!-- MENU -->
 <div id="menuPrincipal">
-
     <span onclick="afficherAccueil()">🏠 Accueil</span>
-
     <span onclick="afficherDashboard()">📊 Dashboard</span>
-
 </div>
 
-<!-- ================= PAGE ACCUEIL ================= -->
+<!-- ACCUEIL -->
 <div id="pageAccueil">
 
     <h1 style="font-size:22px;background:#ff9800;color:white;padding:10px;border-radius:8px;">
@@ -96,7 +79,6 @@ td[contenteditable="true"]{
     </h1>
 
     <div style="display:flex;gap:15px;margin:15px 0;flex-wrap:wrap;">
-
         <div style="background:white;padding:10px 15px;border-radius:8px;min-width:180px;">
             👨‍🏫 Enseignants<br>
             <b id="stat_ens">-</b>
@@ -106,41 +88,20 @@ td[contenteditable="true"]{
             📊 Par jour<br>
             <b id="stat_par_jour">-</b>
         </div>
-
     </div>
-
-    <table id="tableau"></table>
 
 </div>
 
-<!-- ================= PAGE DASHBOARD ================= -->
+<!-- DASHBOARD -->
 <div id="dashboard" style="display:none;">
-
     <h1 style="font-size:22px;background:#ff9800;color:white;padding:10px;border-radius:8px;">
         📊 Dashboard
     </h1>
 
     <p>Graphiques et statistiques ici</p>
-
 </div>
 
-<!-- ================= SCRIPT ================= -->
-<script>
-
-function afficherAccueil(){
-    document.getElementById("pageAccueil").style.display = "block";
-    document.getElementById("dashboard").style.display = "none";
-}
-
-function afficherDashboard(){
-    document.getElementById("pageAccueil").style.display = "none";
-    document.getElementById("dashboard").style.display = "block";
-}
-
-</script>
-
-</body>
-</html>
+<!-- TABLE + CONTROLES -->
 <select id="feuille">
     <option value="Departements">Departements</option>
     <option value="Jours">Jours</option>
@@ -152,86 +113,60 @@ function afficherDashboard(){
 <button onclick="sauvegarder()">💾 Enregistrer</button>
 <button onclick="exportExcel()">📊 Export Excel</button>
 
-<!-- 🔴 STATUS -->
 <div id="status"></div>
 
-<!-- 🔴 TABLE PRINCIPALE -->
 <table id="tableau"></table>
 
+<!-- SCRIPT -->
 <script>
 
-// ==========================
-// API GOOGLE APPS SCRIPT
-// ==========================
 const API = "https://script.google.com/macros/s/AKfycbyZg4xjXxVHMwezbmL3YgdBN-2vudMsaMQ_ScvSV5MsrJn5Mwk6HdRt_wROb2nFk-jc/exec";
 
-
-// ==========================
-// EXPORT EXCEL (CORRIGÉ)
-// ==========================
-function exportExcel() {
-
-  const table = document.getElementById("tableau"); // ✅ CORRECT
-
-  if (!table || table.rows.length === 0) {
-    alert("Aucune donnée à exporter !");
-    return;
-  }
-
-  const rows = Array.from(table.rows).filter(row => {
-    return row.style.display !== "none";
-  });
-
-  const tempTable = document.createElement("table");
-  rows.forEach(r => tempTable.appendChild(r.cloneNode(true)));
-
-  const wb = XLSX.utils.table_to_book(tempTable, { sheet: "Examens" });
-
-  const fileName =
-    "ExamensAdmin_" +
-    new Date().toISOString().slice(0,10) +
-    ".xlsx";
-
-  XLSX.writeFile(wb, fileName);
+/* NAVIGATION */
+function afficherAccueil(){
+    document.getElementById("pageAccueil").style.display = "block";
+    document.getElementById("dashboard").style.display = "none";
 }
 
+function afficherDashboard(){
+    document.getElementById("pageAccueil").style.display = "none";
+    document.getElementById("dashboard").style.display = "block";
+}
 
-// ==========================
-// CONFIG FEUILLES
-// ==========================
+/* EXPORT */
+function exportExcel(){
+
+    const table = document.getElementById("tableau");
+
+    const wb = XLSX.utils.table_to_book(table, { sheet: "Examens" });
+
+    XLSX.writeFile(wb, "ExamensAdmin.xlsx");
+}
+
+/* CONFIG */
 const CONFIG = {
-  Departements: 2,
-  Jours: 3,
-  Surveillances: 6,
-  Historique_Convocations: 6
+    Departements: 2,
+    Jours: 3,
+    Surveillances: 6,
+    Historique_Convocations: 6
 };
 
-
-// ==========================
-// CHARGER DONNÉES
-// ==========================
+/* CHARGER */
 function charger(){
 
     const feuille = document.getElementById("feuille").value;
 
-    fetch(API + "?mode=admin&feuille=" + encodeURIComponent(feuille))
+    fetch(API + "?mode=admin&feuille=" + feuille)
     .then(r => r.json())
     .then(data => {
 
-        if (data.status !== "success") {
-            document.getElementById("status").innerText =
-            "❌ " + data.message;
-            return;
-        }
-
-        const maxCols = CONFIG[feuille];
         let html = "";
 
         data.data.forEach(row => {
 
             html += "<tr>";
 
-            for(let j = 0; j < maxCols; j++){
+            for(let j = 0; j < CONFIG[feuille]; j++){
                 html += `<td contenteditable="true">${row[j] || ""}</td>`;
             }
 
@@ -239,134 +174,43 @@ function charger(){
         });
 
         document.getElementById("tableau").innerHTML = html;
-
-        document.getElementById("status").innerText =
-        "✔ Données chargées";
-    })
-    .catch(err => {
-        console.error(err);
-        document.getElementById("status").innerText =
-        "❌ Erreur chargement API";
+        document.getElementById("status").innerText = "✔ Chargé";
     });
 }
 
-
-// ==========================
-// SAUVEGARDER
-// ==========================
-function sauvegarder(){
-
-    const feuille = document.getElementById("feuille").value;
-    const rows = document.getElementById("tableau").rows;
-    const maxCols = CONFIG[feuille];
-
-    let dataToSend = [];
-
-    for(let i = 0; i < rows.length; i++){
-
-        let valeurs = {};
-
-        for(let j = 0; j < maxCols; j++){
-
-            valeurs[j + 1] =
-            rows[i].cells[j]
-            ? rows[i].cells[j].innerText.trim()
-            : "";
-        }
-
-        dataToSend.push({
-            ligne: i + 1,
-            valeurs: valeurs
-        });
-    }
-
-    const formData = new FormData();
-
-    formData.append("mode", "admin");
-    formData.append("feuille", feuille);
-    formData.append("data", JSON.stringify(dataToSend));
-
-    fetch(API, {
-        method: "POST",
-        body: formData
-    })
-    .then(r => r.json())
-    .then(res => {
-
-        document.getElementById("status").innerText =
-        res.status === "success"
-        ? "✔ Sauvegarde réussie"
-        : "❌ " + res.message;
-
-    })
-    .catch(err => {
-
-        console.error(err);
-
-        document.getElementById("status").innerText =
-        "❌ Erreur réseau";
-    });
-}
-
-
-// ==========================
-// DASHBOARD
-// ==========================
+/* DASHBOARD */
 function chargerDashboard(){
 
-    // ✅ afficher 0 au début
     document.getElementById("stat_ens").innerText = "0";
 
     fetch(API + "?mode=admin&feuille=Surveillances")
     .then(r => r.json())
     .then(surv => {
 
-        if (!surv || !Array.isArray(surv.data)) return;
+        let setEns = new Set();
+        let jours = {};
 
-        let enseignantsSet = new Set();
-        let joursMap = {};
-
-        for (let i = 1; i < surv.data.length; i++) {
+        for(let i=1;i<surv.data.length;i++){
 
             let r = surv.data[i];
-            if (!r) continue;
 
-            let enseignant = (r[1] || "")
-                .toString()
-                .trim();
+            if(!r) continue;
 
-            let jour = (r[3] || "")
-                .toString()
-                .trim();
+            setEns.add(r[1] || "");
 
-            if (enseignant !== "") {
-                enseignantsSet.add(enseignant);
-            }
+            let j = r[3] || "";
 
-            if (jour) {
-                joursMap[jour] = (joursMap[jour] || 0) + 1;
+            if(j){
+                jours[j] = (jours[j]||0)+1;
             }
         }
 
-        // ✅ valeur finale réelle
-        document.getElementById("stat_ens").innerText =
-            enseignantsSet.size;
+        document.getElementById("stat_ens").innerText = setEns.size;
 
-        // =========================
-        // 📊 PAR JOUR
-        // =========================
+        let html = "<table style='width:100%;background:white;'>";
 
-        let html = "<table style='width:100%;background:white;border-collapse:collapse;'>";
-
-        for (let j in joursMap) {
-
-            html += `
-            <tr>
-                <td style="border:1px solid #ccc;padding:5px;">${j}</td>
-                <td style="border:1px solid #ccc;padding:5px;text-align:center;">
-                    <b>${joursMap[j]}</b>
-                </td>
-            </tr>`;
+        for(let j in jours){
+            html += `<tr><td>${j}</td><td>${jours[j]}</td></tr>`;
         }
 
         html += "</table>";
