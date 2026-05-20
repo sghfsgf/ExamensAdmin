@@ -65,7 +65,7 @@ td[contenteditable="true"]{
     <div style="background:white;padding:10px 15px;border-radius:8px;min-width:180px;">
         👨‍🏫 Enseignants<br>
         <b id="stat_ens">-</b>
-    </div>
+            </div>
 
     <div style="background:white;padding:10px 15px;border-radius:8px;min-width:180px;">
         📅 Jours actifs<br>
@@ -73,9 +73,10 @@ td[contenteditable="true"]{
     </div>
 
     <div style="background:white;padding:10px 15px;border-radius:8px;min-width:180px;">
-        📊 Taux remplissage<br>
-        <b id="stat_taux">-</b>
-    </div>
+    📊 Par jour<br>
+    <b id="stat_par_jour">-</b>
+</div>
+</div>
 
 </div>
 
@@ -277,43 +278,64 @@ fetch(API + "?mode=admin&feuille=Surveillances")
 
     if (!surv || surv.status !== "success" || !Array.isArray(surv.data)) {
         document.getElementById("stat_ens").innerText = "0";
-        document.getElementById("stat_taux").innerText = "0%";
+        document.getElementById("stat_jours").innerText = "0";
+        document.getElementById("stat_par_jour").innerText = "";
         return;
     }
 
-    // =========================
-    // 👨‍🏫 ENSEIGNANTS UNIQUES
-    // =========================
     let enseignantsSet = new Set();
+    let joursMap = {}; // jour => Set enseignants
 
     surv.data.forEach((r, i) => {
-        if (i > 0 && r && r[1]) {
 
-            let nom = r[1]
-                .toString()
-                .trim()
-                .toLowerCase();
+        if (i === 0 || !r) return;
 
-            if (nom !== "") {
-                enseignantsSet.add(nom);
+        let enseignant = (r[1] || "").toString().trim().toLowerCase();
+        let jour = (r[3] || "").toString().trim();
+
+        if (enseignant !== "") {
+            enseignantsSet.add(enseignant);
+        }
+
+        if (jour !== "") {
+
+            if (!joursMap[jour]) {
+                joursMap[jour] = new Set();
+            }
+
+            if (enseignant !== "") {
+                joursMap[jour].add(enseignant);
             }
         }
     });
 
+    // =========================
+    // 👨‍🏫 ENSEIGNANTS UNIQUES
+    // =========================
     document.getElementById("stat_ens").innerText =
-    enseignantsSet.size;
+        enseignantsSet.size;
 
     // =========================
-    // 📊 TAUX DE REMPLISSAGE
+    // 📅 JOURS ACTIFS
     // =========================
-    const total = surv.data.length - 1;
+    document.getElementById("stat_jours").innerText =
+        Object.keys(joursMap).length;
 
-    const max = 100;
+    // =========================
+    // 📊 CAPACITÉ PAR JOUR
+    // =========================
+    let html = "";
 
-    let taux = (total / max) * 100;
+    Object.keys(joursMap).forEach(jour => {
 
-    document.getElementById("stat_taux").innerText =
-    Math.min(100, Math.round(taux)) + "%";
+        html += `
+            <div style="margin-top:5px;">
+                ${jour} : <b>${joursMap[jour].size}</b> enseignants
+            </div>
+        `;
+    });
+
+    document.getElementById("stat_par_jour").innerHTML = html;
 
 });
 }
