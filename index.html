@@ -4,10 +4,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>ExamensAdmin</title>
-
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-
 <style>
 
 body{
@@ -16,32 +15,16 @@ body{
     background:#f4f4f4;
 }
 
-/* MENU */
-#menuPrincipal{
-    background:#ffcc80;
-    padding:15px;
-    border-radius:10px;
-    display:flex;
-    gap:20px;
-    justify-content:flex-start;
-    align-items:center;
+h1{
+    color:#222;
 }
 
-#menuPrincipal span{
-    background:#ff9800;
-    color:white;
-    font-size:22px;
-    font-weight:bold;
-    padding:8px 15px;
-    border-radius:8px;
-    cursor:pointer;
+select,button{
+    padding:10px;
+    margin:5px;
+    font-size:14px;
 }
 
-#menuPrincipal span:hover{
-    background:#f57c00;
-}
-
-/* TABLE */
 table{
     width:100%;
     border-collapse:collapse;
@@ -59,71 +42,39 @@ td[contenteditable="true"]{
     background:#fff8dc;
 }
 
+#status{
+    margin-top:10px;
+    font-weight:bold;
+    color:green;
+}
+
 </style>
 
 </head>
 
 <body>
 
-<!-- MENU -->
-<div id="menuPrincipal">
-    <span onclick="afficherAccueil()">🏠 Accueil</span>
-    <span onclick="afficherDashboard()">📊 Dashboard</span>
-</div>
+<h1>📊 ExamensAdmin</h1>
+    <div id="dashboard" style="
+    display:flex;
+    gap:15px;
+    margin:15px 0;
+    flex-wrap:wrap;
+">
 
-<!-- ACCUEIL -->
-<div id="pageAccueil">
-
-    <h1 style="font-size:22px;background:#ff9800;color:white;padding:10px;border-radius:8px;">
-        🏠 Accueil
-    </h1>
-
-    <div style="display:flex;gap:15px;margin:15px 0;flex-wrap:wrap;">
-        <div style="background:white;padding:10px 15px;border-radius:8px;min-width:180px;">
-            👨‍🏫 Enseignants<br>
-            <b id="stat_ens">-</b>
-        </div>
+    <div style="background:white;padding:10px 15px;border-radius:8px;min-width:180px;">
+        👨‍🏫 Enseignants<br>
+        <b id="stat_ens">-</b>
+            </div>
 
         <div style="background:white;padding:10px 15px;border-radius:8px;min-width:180px;">
-            📊 Par jour<br>
-            <b id="stat_par_jour">-</b>
-        </div>
-    </div>
+    📊 Par jour<br>
+    <b id="stat_par_jour">-</b>
+</div>
+</div>
 
 </div>
 
-<!-- DASHBOARD -->
-<div id="dashboard" style="display:none;">
-
-    <h1 style="font-size:22px;background:#ff9800;color:white;padding:10px;border-radius:8px;">
-        📊 Dashboard
-    </h1>
-
-    <!-- 🔥 ZONE STATISTIQUES -->
-    <div style="display:flex;gap:15px;flex-wrap:wrap;margin-top:15px;">
-
-        <div style="background:white;padding:15px;border-radius:10px;min-width:200px;">
-            👨‍🏫 Total enseignants<br>
-            <b id="dash_ens">-</b>
-        </div>
-
-        <div style="background:white;padding:15px;border-radius:10px;min-width:200px;">
-            📅 Total jours utilisés<br>
-            <b id="dash_jours">-</b>
-        </div>
-
-        <div style="background:white;padding:15px;border-radius:10px;min-width:200px;">
-            📊 Total surveillances<br>
-            <b id="dash_surveillances">-</b>
-        </div>
-
-    </div>
-
-</div>
-   
-</div>
-
-<!-- TABLE + CONTROLES -->
 <select id="feuille">
     <option value="Departements">Departements</option>
     <option value="Jours">Jours</option>
@@ -133,99 +84,265 @@ td[contenteditable="true"]{
 
 <button onclick="charger()">📥 Charger</button>
 <button onclick="sauvegarder()">💾 Enregistrer</button>
-<button onclick="exportExcel()">📊 Export Excel</button>
 
 <div id="status"></div>
 
 <table id="tableau"></table>
+    <button onclick="exportExcel()">📊 Export Excel</button>
 
-<!-- SCRIPT -->
 <script>
 
+// ==========================
+// API GOOGLE APPS SCRIPT
+// ==========================
 const API = "https://script.google.com/macros/s/AKfycbyZg4xjXxVHMwezbmL3YgdBN-2vudMsaMQ_ScvSV5MsrJn5Mwk6HdRt_wROb2nFk-jc/exec";
+function exportExcel() {
+  const table = document.getElementById("examensTable");
 
-/* NAVIGATION */
-function afficherAccueil(){
-    document.getElementById("pageAccueil").style.display = "block";
-    document.getElementById("dashboard").style.display = "none";
+  const rows = Array.from(table.rows).filter(row => {
+    return row.style.display !== "none";
+  });
+
+  const tempTable = document.createElement("table");
+  rows.forEach(r => tempTable.appendChild(r.cloneNode(true)));
+
+  const wb = XLSX.utils.table_to_book(tempTable, { sheet: "Examens" });
+
+  XLSX.writeFile(wb, "ExamensAdmin.xlsx");
 }
 
-function afficherDashboard(){
-    document.getElementById("pageAccueil").style.display = "none";
-    document.getElementById("dashboard").style.display = "block";
-}
-
-/* EXPORT */
-function exportExcel(){
-
-    const table = document.getElementById("tableau");
-
-    const wb = XLSX.utils.table_to_book(table, { sheet: "Examens" });
-
-    XLSX.writeFile(wb, "ExamensAdmin.xlsx");
-}
-
-/* CONFIG */
+// ==========================
+// CONFIG FEUILLES
+// ==========================
 const CONFIG = {
-    Departements: 2,
-    Jours: 3,
-    Surveillances: 6,
-    Historique_Convocations: 6
+
+  Departements: 2,   // A, B
+  Jours: 3,          // A, B, C
+  Surveillances: 6,  // jusqu'à F
+  Historique_Convocations: 6
+
 };
 
-/* CHARGER */
-function chargerDashboard(){
 
-    fetch(API + "?mode=admin&feuille=Surveillances")
+// ==========================
+// CHARGER DONNÉES
+// ==========================
+function charger(){
+
+    const feuille = document.getElementById("feuille").value;
+
+    fetch(API + "?mode=admin&feuille=" + encodeURIComponent(feuille))
     .then(r => r.json())
-    .then(surv => {
+    .then(data => {
 
-        let setEns = new Set();
-        let jours = {};
-        let total = 0;
-
-        for(let i=1;i<surv.data.length;i++){
-
-            let r = surv.data[i];
-            if(!r) continue;
-
-            let ens = (r[1] || "").trim();
-            let j = (r[3] || "").trim();
-
-            if(ens) setEns.add(ens);
-            if(j) jours[j] = (jours[j]||0)+1;
-
-            total++;
+        if (data.status !== "success") {
+            document.getElementById("status").innerText =
+            "❌ " + data.message;
+            return;
         }
 
-        // =========================
-        // 🏠 ACCUEIL (inchangé)
-        // =========================
-        document.getElementById("stat_ens").innerText = setEns.size;
+        const maxCols = CONFIG[feuille];
+        let html = "";
 
-        let html = "<table style='width:100%;background:white;'>";
+        data.data.forEach(row => {
 
-        for(let j in jours){
-            html += `<tr><td>${j}</td><td>${jours[j]}</td></tr>`;
-        }
+            html += "<tr>";
 
-        document.getElementById("stat_par_jour").innerHTML = html;
+            for(let j = 0; j < maxCols; j++){
+                html += `<td contenteditable="true">${row[j] || ""}</td>`;
+            }
 
-        // =========================
-        // 📊 DASHBOARD (NOUVEAU)
-        // =========================
-        if(document.getElementById("dash_ens")){
+            html += "</tr>";
+        });
 
-            document.getElementById("dash_ens").innerText = setEns.size;
-            document.getElementById("dash_jours").innerText = Object.keys(jours).length;
-            document.getElementById("dash_surveillances").innerText = total;
-        }
+        document.getElementById("tableau").innerHTML = html;
 
+        document.getElementById("status").innerText =
+        "✔ Données chargées";
+    })
+    .catch(err => {
+        console.error(err);
+        document.getElementById("status").innerText =
+        "❌ Erreur chargement API";
     });
 }
 
-chargerDashboard();
+// ==========================
+// SAUVEGARDER
+// ==========================
+function sauvegarder(){
 
+    const feuille =
+    document.getElementById("feuille").value;
+
+    const rows =
+    document.getElementById("tableau").rows;
+
+    const maxCols = CONFIG[feuille];
+
+    let dataToSend = [];
+
+    for(let i = 0; i < rows.length; i++){
+
+        let valeurs = {};
+
+        for(let j = 0; j < maxCols; j++){
+
+            valeurs[j + 1] =
+            rows[i].cells[j]
+            ? rows[i].cells[j].innerText.trim()
+            : "";
+        }
+
+        dataToSend.push({
+            ligne: i + 1,
+            valeurs: valeurs
+        });
+    }
+
+    const formData = new FormData();
+
+    formData.append("mode", "admin");
+    formData.append("feuille", feuille);
+    formData.append("data", JSON.stringify(dataToSend));
+
+    fetch(API, {
+
+        method: "POST",
+
+        body: formData
+
+    })
+
+    .then(r => r.json())
+
+    .then(res => {
+
+        if(res.status === "success"){
+
+            document.getElementById("status").innerText =
+            "✔ Sauvegarde réussie";
+
+        }else{
+
+            document.getElementById("status").innerText =
+            "❌ " + res.message;
+        }
+    })
+
+    .catch(err => {
+
+        console.error(err);
+
+        document.getElementById("status").innerText =
+        "❌ Erreur réseau";
+    });
+}
+    // ==========================
+// TABLEAU DE BORD
+// ==========================
+function chargerDashboard(){
+
+    fetch(API + "?mode=admin&feuille=Departements")
+    .then(r => r.json())
+    .then(dep => {
+
+        if(dep.status !== "success") return;
+
+        let enseignants = 0;
+
+dep.data.forEach((r, i) => {
+    if (i > 0) {
+        enseignants += parseInt(r[2]) || 0;
+    }
+});
+
+        document.getElementById("stat_ens").innerText =
+        enseignants;
+
+    });
+
+document.getElementById("stat_ens").innerText = "0";
+
+fetch(API + "?mode=admin&feuille=Surveillances")
+.then(r => r.json())
+.then(surv => {
+
+    if (!surv || !Array.isArray(surv.data) || surv.data.length <= 1) {
+        console.warn("API vide");
+        return;
+    }
+
+    let enseignantsSet = new Set();
+    let joursMap = {};
+
+    for (let i = 1; i < surv.data.length; i++) {
+
+        let r = surv.data[i];
+        if (!r) continue;
+
+        let enseignant = (r[1] || "")
+            .toString()
+            .trim()
+            .toLowerCase();
+
+        let jour = (r[3] || "")
+            .toString()
+            .trim();
+
+        if (enseignant) {
+            enseignantsSet.add(enseignant);
+        }
+
+        if (jour) {
+            joursMap[jour] = (joursMap[jour] || 0) + 1;
+        }
+    }
+
+    const nbEns = enseignantsSet.size;
+
+    // ✅ affichage final
+    setTimeout(() => {
+
+        document.getElementById("stat_ens").innerText = nbEns;
+
+    }, 300);
+
+    // =========================
+    // 📊 TABLEAU PAR JOUR
+    // =========================
+
+    let html = `
+    <table style="width:100%;border-collapse:collapse;background:white;">
+        <tr style="background:#eee;">
+            <th style="border:1px solid #ccc;padding:5px;">Jour</th>
+            <th style="border:1px solid #ccc;padding:5px;">Nombre</th>
+        </tr>
+    `;
+
+    Object.keys(joursMap).forEach(j => {
+
+        html += `
+        <tr>
+            <td style="border:1px solid #ccc;padding:5px;">${j}</td>
+            <td style="border:1px solid #ccc;padding:5px;text-align:center;">
+                <b>${joursMap[j]}</b>
+            </td>
+        </tr>`;
+    });
+
+    html += "</table>";
+
+    document.getElementById("stat_par_jour").innerHTML = html;
+
+})
+.catch(err => {
+    console.error(err);
+});
+
+
+}
+    chargerDashboard();
 </script>
 
 </body>
