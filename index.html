@@ -248,7 +248,7 @@ dep.data.forEach((r, i) => {
 
     });
 
- let dashboardLock = false;
+document.getElementById("stat_ens").innerText = "0";
 
 fetch(API + "?mode=admin&feuille=Surveillances")
 .then(r => r.json())
@@ -267,10 +267,18 @@ fetch(API + "?mode=admin&feuille=Surveillances")
         let r = surv.data[i];
         if (!r) continue;
 
-        let enseignant = (r[1] || "").toString().trim().toLowerCase();
-        let jour = (r[3] || "").toString().trim();
+        let enseignant = (r[1] || "")
+            .toString()
+            .trim()
+            .toLowerCase();
 
-        if (enseignant) enseignantsSet.add(enseignant);
+        let jour = (r[3] || "")
+            .toString()
+            .trim();
+
+        if (enseignant) {
+            enseignantsSet.add(enseignant);
+        }
 
         if (jour) {
             joursMap[jour] = (joursMap[jour] || 0) + 1;
@@ -279,21 +287,16 @@ fetch(API + "?mode=admin&feuille=Surveillances")
 
     const nbEns = enseignantsSet.size;
 
-    // 🔒 verrou global anti écrasement
-    if (!dashboardLock) {
+    // ✅ affichage final
+    setTimeout(() => {
 
-        dashboardLock = true;
+        document.getElementById("stat_ens").innerText = nbEns;
 
-        const el = document.getElementById("stat_ens");
+    }, 300);
 
-        if (el) {
-            el.innerText = nbEns;
-        }
-
-        setTimeout(() => {
-            dashboardLock = false;
-        }, 300);
-    }
+    // =========================
+    // 📊 TABLEAU PAR JOUR
+    // =========================
 
     let html = `
     <table style="width:100%;border-collapse:collapse;background:white;">
@@ -318,7 +321,12 @@ fetch(API + "?mode=admin&feuille=Surveillances")
 
     document.getElementById("stat_par_jour").innerHTML = html;
 
+})
+.catch(err => {
+    console.error(err);
 });
+
+
 }
     chargerDashboard();
 </script>
