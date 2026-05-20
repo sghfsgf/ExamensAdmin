@@ -6,7 +6,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>ExamensAdmin</title>
+
+<!-- XLSX -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
 <style>
 
 body{
@@ -55,23 +58,18 @@ td[contenteditable="true"]{
 <body>
 
 <h1>📊 ExamensAdmin</h1>
-    <div id="dashboard" style="
-    display:flex;
-    gap:15px;
-    margin:15px 0;
-    flex-wrap:wrap;
-">
+
+<div id="dashboard" style="display:flex;gap:15px;margin:15px 0;flex-wrap:wrap;">
 
     <div style="background:white;padding:10px 15px;border-radius:8px;min-width:180px;">
         👨‍🏫 Enseignants<br>
         <b id="stat_ens">-</b>
-            </div>
+    </div>
 
-        <div style="background:white;padding:10px 15px;border-radius:8px;min-width:180px;">
-    📊 Par jour<br>
-    <b id="stat_par_jour">-</b>
-</div>
-</div>
+    <div style="background:white;padding:10px 15px;border-radius:8px;min-width:180px;">
+        📊 Par jour<br>
+        <b id="stat_par_jour">-</b>
+    </div>
 
 </div>
 
@@ -85,10 +83,14 @@ td[contenteditable="true"]{
 <button onclick="charger()">📥 Charger</button>
 <button onclick="sauvegarder()">💾 Enregistrer</button>
 
+<!-- 🔴 STATUS -->
 <div id="status"></div>
 
+<!-- 🔴 TABLE PRINCIPALE -->
 <table id="tableau"></table>
-    <button onclick="exportExcel()">📊 Export Excel</button>
+
+<!-- EXPORT -->
+<button onclick="exportExcel()">📊 Export Excel</button>
 
 <script>
 
@@ -96,8 +98,19 @@ td[contenteditable="true"]{
 // API GOOGLE APPS SCRIPT
 // ==========================
 const API = "https://script.google.com/macros/s/AKfycbyZg4xjXxVHMwezbmL3YgdBN-2vudMsaMQ_ScvSV5MsrJn5Mwk6HdRt_wROb2nFk-jc/exec";
+
+
+// ==========================
+// EXPORT EXCEL (CORRIGÉ)
+// ==========================
 function exportExcel() {
-  const table = document.getElementById("examensTable");
+
+  const table = document.getElementById("tableau"); // ✅ CORRECT
+
+  if (!table || table.rows.length === 0) {
+    alert("Aucune donnée à exporter !");
+    return;
+  }
 
   const rows = Array.from(table.rows).filter(row => {
     return row.style.display !== "none";
@@ -108,19 +121,23 @@ function exportExcel() {
 
   const wb = XLSX.utils.table_to_book(tempTable, { sheet: "Examens" });
 
-  XLSX.writeFile(wb, "ExamensAdmin.xlsx");
+  const fileName =
+    "ExamensAdmin_" +
+    new Date().toISOString().slice(0,10) +
+    ".xlsx";
+
+  XLSX.writeFile(wb, fileName);
 }
+
 
 // ==========================
 // CONFIG FEUILLES
 // ==========================
 const CONFIG = {
-
-  Departements: 2,   // A, B
-  Jours: 3,          // A, B, C
-  Surveillances: 6,  // jusqu'à F
+  Departements: 2,
+  Jours: 3,
+  Surveillances: 6,
   Historique_Convocations: 6
-
 };
 
 
@@ -167,17 +184,14 @@ function charger(){
     });
 }
 
+
 // ==========================
 // SAUVEGARDER
 // ==========================
 function sauvegarder(){
 
-    const feuille =
-    document.getElementById("feuille").value;
-
-    const rows =
-    document.getElementById("tableau").rows;
-
+    const feuille = document.getElementById("feuille").value;
+    const rows = document.getElementById("tableau").rows;
     const maxCols = CONFIG[feuille];
 
     let dataToSend = [];
@@ -207,29 +221,18 @@ function sauvegarder(){
     formData.append("data", JSON.stringify(dataToSend));
 
     fetch(API, {
-
         method: "POST",
-
         body: formData
-
     })
-
     .then(r => r.json())
-
     .then(res => {
 
-        if(res.status === "success"){
+        document.getElementById("status").innerText =
+        res.status === "success"
+        ? "✔ Sauvegarde réussie"
+        : "❌ " + res.message;
 
-            document.getElementById("status").innerText =
-            "✔ Sauvegarde réussie";
-
-        }else{
-
-            document.getElementById("status").innerText =
-            "❌ " + res.message;
-        }
     })
-
     .catch(err => {
 
         console.error(err);
@@ -238,8 +241,10 @@ function sauvegarder(){
         "❌ Erreur réseau";
     });
 }
-    // ==========================
-// TABLEAU DE BORD
+
+
+// ==========================
+// DASHBOARD
 // ==========================
 function chargerDashboard(){
 
@@ -247,102 +252,61 @@ function chargerDashboard(){
     .then(r => r.json())
     .then(dep => {
 
-        if(dep.status !== "success") return;
+        if(dep.status === "success"){
 
-        let enseignants = 0;
+            let enseignants = 0;
 
-dep.data.forEach((r, i) => {
-    if (i > 0) {
-        enseignants += parseInt(r[2]) || 0;
-    }
-});
+            dep.data.forEach((r, i) => {
+                if (i > 0) {
+                    enseignants += parseInt(r[2]) || 0;
+                }
+            });
 
-        document.getElementById("stat_ens").innerText =
-        enseignants;
-
+            document.getElementById("stat_ens").innerText = enseignants;
+        }
     });
 
-document.getElementById("stat_ens").innerText = "0";
 
-fetch(API + "?mode=admin&feuille=Surveillances")
-.then(r => r.json())
-.then(surv => {
+    fetch(API + "?mode=admin&feuille=Surveillances")
+    .then(r => r.json())
+    .then(surv => {
 
-    if (!surv || !Array.isArray(surv.data) || surv.data.length <= 1) {
-        console.warn("API vide");
-        return;
-    }
+        if (!surv || !Array.isArray(surv.data)) return;
 
-    let enseignantsSet = new Set();
-    let joursMap = {};
+        let joursMap = {};
 
-    for (let i = 1; i < surv.data.length; i++) {
+        for (let i = 1; i < surv.data.length; i++) {
 
-        let r = surv.data[i];
-        if (!r) continue;
+            let r = surv.data[i];
+            if (!r) continue;
 
-        let enseignant = (r[1] || "")
-            .toString()
-            .trim()
-            .toLowerCase();
+            let jour = (r[3] || "").toString().trim();
 
-        let jour = (r[3] || "")
-            .toString()
-            .trim();
-
-        if (enseignant) {
-            enseignantsSet.add(enseignant);
+            if (jour) {
+                joursMap[jour] = (joursMap[jour] || 0) + 1;
+            }
         }
 
-        if (jour) {
-            joursMap[jour] = (joursMap[jour] || 0) + 1;
+        let html = "<table style='width:100%;background:white;border-collapse:collapse;'>";
+
+        for (let j in joursMap) {
+            html += `
+            <tr>
+                <td style="border:1px solid #ccc;padding:5px;">${j}</td>
+                <td style="border:1px solid #ccc;padding:5px;text-align:center;">
+                    <b>${joursMap[j]}</b>
+                </td>
+            </tr>`;
         }
-    }
 
-    const nbEns = enseignantsSet.size;
+        html += "</table>";
 
-    // ✅ affichage final
-    setTimeout(() => {
-
-        document.getElementById("stat_ens").innerText = nbEns;
-
-    }, 300);
-
-    // =========================
-    // 📊 TABLEAU PAR JOUR
-    // =========================
-
-    let html = `
-    <table style="width:100%;border-collapse:collapse;background:white;">
-        <tr style="background:#eee;">
-            <th style="border:1px solid #ccc;padding:5px;">Jour</th>
-            <th style="border:1px solid #ccc;padding:5px;">Nombre</th>
-        </tr>
-    `;
-
-    Object.keys(joursMap).forEach(j => {
-
-        html += `
-        <tr>
-            <td style="border:1px solid #ccc;padding:5px;">${j}</td>
-            <td style="border:1px solid #ccc;padding:5px;text-align:center;">
-                <b>${joursMap[j]}</b>
-            </td>
-        </tr>`;
+        document.getElementById("stat_par_jour").innerHTML = html;
     });
-
-    html += "</table>";
-
-    document.getElementById("stat_par_jour").innerHTML = html;
-
-})
-.catch(err => {
-    console.error(err);
-});
-
-
 }
-    chargerDashboard();
+
+chargerDashboard();
+
 </script>
 
 </body>
