@@ -270,13 +270,15 @@ dep.data.forEach((r, i) => {
 fetch(API + "?mode=admin&feuille=Surveillances")
 .then(r => r.json())
 .then(surv => {
+if (!surv || surv.status !== "success" || !Array.isArray(surv.data)) {
 
-    if (!surv || surv.status !== "success" || !Array.isArray(surv.data)) {
+    console.warn("Surveillances API invalide ou vide");
 
-        document.getElementById("stat_ens").innerText = "0";
-        document.getElementById("stat_par_jour").innerHTML = "";
-        return;
-    }
+    // ❌ on NE touche PAS à stat_ens
+    document.getElementById("stat_par_jour").innerHTML = "";
+
+    return;
+}
 
     let enseignantsSet = new Set();
     let joursMap = {};
