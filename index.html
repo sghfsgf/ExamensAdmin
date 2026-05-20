@@ -82,13 +82,22 @@ td[contenteditable="true"]{
     <option value="Historique_Convocations">Historique_Convocations</option>
 </select>
 
-<button onclick="charger()">📥 Charger</button>
-<button onclick="sauvegarder()">💾 Enregistrer</button>
+<!-- 🔘 BOUTONS -->
+<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:10px;">
 
+    <button onclick="charger()">📥 Charger</button>
+    <button onclick="sauvegarder()">💾 Enregistrer</button>
+    <button onclick="exportExcel()">📊 Export Excel</button>
+
+</div>
+
+<!-- 📊 STATUS -->
 <div id="status"></div>
 
-<table id="tableau"></table>
-    <button onclick="exportExcel()">📊 Export Excel</button>
+<!-- 📋 TABLE -->
+<div style="overflow-x:auto;">
+    <table id="tableau"></table>
+</div>
 
 <script>
 
