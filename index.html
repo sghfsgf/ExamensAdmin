@@ -267,16 +267,14 @@ dep.data.forEach((r, i) => {
 
     });
 
+let dashboardLoaded = false;
+
 fetch(API + "?mode=admin&feuille=Surveillances")
 .then(r => r.json())
 .then(surv => {
 
-    if (!surv || surv.status !== "success" || !Array.isArray(surv.data)) {
-
-        console.warn("Surveillances API invalide ou vide");
-
-        document.getElementById("stat_ens").innerText = "0";
-        document.getElementById("stat_par_jour").innerHTML = "";
+    if (!surv || !Array.isArray(surv.data) || surv.data.length === 0) {
+        console.warn("API vide ignorée (évite overwrite)");
         return;
     }
 
@@ -288,27 +286,27 @@ fetch(API + "?mode=admin&feuille=Surveillances")
         let r = surv.data[i];
         if (!r) continue;
 
-        let enseignant = (r[1] || "").toString().trim().toLowerCase(); // Col B
-        let jour = (r[3] || "").toString().trim(); // Col D
+        let enseignant = (r[1] || "").toString().trim().toLowerCase();
+        let jour = (r[3] || "").toString().trim();
 
-        if (enseignant !== "") {
+        if (enseignant) {
             enseignantsSet.add(enseignant);
         }
 
-        if (jour !== "") {
+        if (jour) {
             joursMap[jour] = (joursMap[jour] || 0) + 1;
         }
     }
 
-    // =========================
-    // 👨‍🏫 ENSEIGNANTS
-    // =========================
     const nbEns = enseignantsSet.size;
-    document.getElementById("stat_ens").innerText = nbEns;
 
-    // =========================
-    // 📊 TABLEAU PAR JOUR
-    // =========================
+    // 🔥 IMPORTANT : protection anti écrasement
+    if (nbEns > 0) {
+        document.getElementById("stat_ens").innerText = nbEns;
+        dashboardLoaded = true;
+    }
+
+    // 📊 tableau jours
     let html = `
     <table style="width:100%;border-collapse:collapse;background:white;">
         <tr style="background:#eee;">
@@ -318,7 +316,6 @@ fetch(API + "?mode=admin&feuille=Surveillances")
     `;
 
     Object.keys(joursMap).forEach(j => {
-
         html += `
         <tr>
             <td style="border:1px solid #ccc;padding:5px;">${j}</td>
