@@ -246,83 +246,65 @@ function sauvegarder(){
 // ==========================
 function chargerDashboard(){
 
-    fetch(API + "?mode=admin&feuille=Departements")
+    // ✅ afficher 0 au début
+    document.getElementById("stat_ens").innerText = "0";
+
+    fetch(API + "?mode=admin&feuille=Surveillances")
     .then(r => r.json())
-    .then(dep => {
+    .then(surv => {
 
-        if(dep.status === "success"){
+        if (!surv || !Array.isArray(surv.data)) return;
 
-            let enseignants = 0;
+        let enseignantsSet = new Set();
+        let joursMap = {};
 
-            dep.data.forEach((r, i) => {
-                if (i > 0) {
-                    enseignants += parseInt(r[2]) || 0;
-                }
-            });
+        for (let i = 1; i < surv.data.length; i++) {
 
-            document.getElementById("stat_ens").innerText = enseignants;
+            let r = surv.data[i];
+            if (!r) continue;
+
+            let enseignant = (r[1] || "")
+                .toString()
+                .trim();
+
+            let jour = (r[3] || "")
+                .toString()
+                .trim();
+
+            if (enseignant !== "") {
+                enseignantsSet.add(enseignant);
+            }
+
+            if (jour) {
+                joursMap[jour] = (joursMap[jour] || 0) + 1;
+            }
         }
+
+        // ✅ valeur finale réelle
+        document.getElementById("stat_ens").innerText =
+            enseignantsSet.size;
+
+        // =========================
+        // 📊 PAR JOUR
+        // =========================
+
+        let html = "<table style='width:100%;background:white;border-collapse:collapse;'>";
+
+        for (let j in joursMap) {
+
+            html += `
+            <tr>
+                <td style="border:1px solid #ccc;padding:5px;">${j}</td>
+                <td style="border:1px solid #ccc;padding:5px;text-align:center;">
+                    <b>${joursMap[j]}</b>
+                </td>
+            </tr>`;
+        }
+
+        html += "</table>";
+
+        document.getElementById("stat_par_jour").innerHTML = html;
     });
-
-fetch(API + "?mode=admin&feuille=Surveillances")
-.then(r => r.json())
-.then(surv => {
-
-    if (!surv || !Array.isArray(surv.data)) return;
-
-    // =========================
-    // 👨‍🏫 ENSEIGNANTS (CORRIGÉ)
-    // =========================
-    let enseignantsSet = new Set();
-
-    for (let i = 1; i < surv.data.length; i++) {
-
-        let r = surv.data[i];
-        if (!r) continue;
-
-        // ⚠️ colonne enseignant (adapte si besoin)
-        let enseignant = (r[1] || "").toString().trim();
-
-        if (enseignant !== "") {
-            enseignantsSet.add(enseignant);
-        }
-    }
-
-    document.getElementById("stat_ens").innerText = enseignantsSet.size;
-
-    // =========================
-    // 📊 PAR JOUR (inchangé)
-    // =========================
-    let joursMap = {};
-
-    for (let i = 1; i < surv.data.length; i++) {
-
-        let r = surv.data[i];
-        if (!r) continue;
-
-        let jour = (r[3] || "").toString().trim();
-
-        if (jour) {
-            joursMap[jour] = (joursMap[jour] || 0) + 1;
-        }
-    }
-
-    let html = "<table style='width:100%;background:white;border-collapse:collapse;'>";
-
-    for (let j in joursMap) {
-        html += `
-        <tr>
-            <td style="border:1px solid #ccc;padding:5px;">${j}</td>
-            <td style="border:1px solid #ccc;padding:5px;text-align:center;">
-                <b>${joursMap[j]}</b>
-            </td>
-        </tr>`;
-    }
-
-    html += "</table>";
-
-    document.getElementById("stat_par_jour").innerHTML = html;
-});
 }
 
 chargerDashboard();
