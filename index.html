@@ -264,43 +264,65 @@ function chargerDashboard(){
         }
     });
 
+fetch(API + "?mode=admin&feuille=Surveillances")
+.then(r => r.json())
+.then(surv => {
 
-    fetch(API + "?mode=admin&feuille=Surveillances")
-    .then(r => r.json())
-    .then(surv => {
+    if (!surv || !Array.isArray(surv.data)) return;
 
-        if (!surv || !Array.isArray(surv.data)) return;
+    // =========================
+    // 👨‍🏫 ENSEIGNANTS (CORRIGÉ)
+    // =========================
+    let enseignantsSet = new Set();
 
-        let joursMap = {};
+    for (let i = 1; i < surv.data.length; i++) {
 
-        for (let i = 1; i < surv.data.length; i++) {
+        let r = surv.data[i];
+        if (!r) continue;
 
-            let r = surv.data[i];
-            if (!r) continue;
+        // ⚠️ colonne enseignant (adapte si besoin)
+        let enseignant = (r[1] || "").toString().trim();
 
-            let jour = (r[3] || "").toString().trim();
-
-            if (jour) {
-                joursMap[jour] = (joursMap[jour] || 0) + 1;
-            }
+        if (enseignant !== "") {
+            enseignantsSet.add(enseignant);
         }
+    }
 
-        let html = "<table style='width:100%;background:white;border-collapse:collapse;'>";
+    document.getElementById("stat_ens").innerText = enseignantsSet.size;
 
-        for (let j in joursMap) {
-            html += `
-            <tr>
-                <td style="border:1px solid #ccc;padding:5px;">${j}</td>
-                <td style="border:1px solid #ccc;padding:5px;text-align:center;">
-                    <b>${joursMap[j]}</b>
-                </td>
-            </tr>`;
+    // =========================
+    // 📊 PAR JOUR (inchangé)
+    // =========================
+    let joursMap = {};
+
+    for (let i = 1; i < surv.data.length; i++) {
+
+        let r = surv.data[i];
+        if (!r) continue;
+
+        let jour = (r[3] || "").toString().trim();
+
+        if (jour) {
+            joursMap[jour] = (joursMap[jour] || 0) + 1;
         }
+    }
 
-        html += "</table>";
+    let html = "<table style='width:100%;background:white;border-collapse:collapse;'>";
 
-        document.getElementById("stat_par_jour").innerHTML = html;
-    });
+    for (let j in joursMap) {
+        html += `
+        <tr>
+            <td style="border:1px solid #ccc;padding:5px;">${j}</td>
+            <td style="border:1px solid #ccc;padding:5px;text-align:center;">
+                <b>${joursMap[j]}</b>
+            </td>
+        </tr>`;
+    }
+
+    html += "</table>";
+
+    document.getElementById("stat_par_jour").innerHTML = html;
+});
 }
 
 chargerDashboard();
