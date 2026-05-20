@@ -324,18 +324,38 @@ fetch(API + "?mode=admin&feuille=Surveillances")
     // =========================
     // 📊 CAPACITÉ PAR JOUR
     // =========================
-    let html = "";
+    let html = `
+<table style="
+    width:100%;
+    margin-top:10px;
+    border-collapse:collapse;
+    background:white;
+    font-size:14px;
+">
 
-    Object.keys(joursMap).forEach(jour => {
+<tr style="background:#eee;">
+    <th style="border:1px solid #ccc;padding:5px;">Jour</th>
+    <th style="border:1px solid #ccc;padding:5px;">Enseignants</th>
+</tr>
+`;
 
-        html += `
-            <div style="margin-top:5px;">
-                ${jour} : <b>${joursMap[jour].size}</b> enseignants
-            </div>
-        `;
-    });
+Object.keys(joursMap).forEach(jour => {
 
-    document.getElementById("stat_par_jour").innerHTML = html;
+    html += `
+        <tr>
+            <td style="border:1px solid #ccc;padding:5px;">
+                ${jour}
+            </td>
+            <td style="border:1px solid #ccc;padding:5px;text-align:center;">
+                <b>${joursMap[jour].size}</b>
+            </td>
+        </tr>
+    `;
+});
+
+html += "</table>";
+
+document.getElementById("stat_par_jour").innerHTML = html;
 
 });
 }
