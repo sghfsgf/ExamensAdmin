@@ -270,45 +270,41 @@ dep.data.forEach((r, i) => {
 fetch(API + "?mode=admin&feuille=Surveillances")
 .then(r => r.json())
 .then(surv => {
-if (!surv || surv.status !== "success" || !Array.isArray(surv.data)) {
 
-    console.warn("Surveillances API invalide ou vide");
+    if (!surv || surv.status !== "success" || !Array.isArray(surv.data)) {
 
-    // ❌ on NE touche PAS à stat_ens
-    document.getElementById("stat_par_jour").innerHTML = "";
+        console.warn("Surveillances API invalide ou vide");
 
-    return;
-}
+        document.getElementById("stat_ens").innerText = "0";
+        document.getElementById("stat_par_jour").innerHTML = "";
+        return;
+    }
 
     let enseignantsSet = new Set();
     let joursMap = {};
 
-    surv.data.forEach((r, i) => {
+    for (let i = 1; i < surv.data.length; i++) {
 
-        if (i === 0 || !r) return;
+        let r = surv.data[i];
+        if (!r) continue;
 
         let enseignant = (r[1] || "").toString().trim().toLowerCase(); // Col B
         let jour = (r[3] || "").toString().trim(); // Col D
 
-        // 👨‍🏫 enseignants uniques
-        if (enseignant) {
+        if (enseignant !== "") {
             enseignantsSet.add(enseignant);
         }
 
-        // 📊 compteur par jour
-        if (jour) {
-            if (!joursMap[jour]) {
-                joursMap[jour] = 0;
-            }
-            joursMap[jour]++;
+        if (jour !== "") {
+            joursMap[jour] = (joursMap[jour] || 0) + 1;
         }
-    });
+    }
 
     // =========================
     // 👨‍🏫 ENSEIGNANTS
     // =========================
-    document.getElementById("stat_ens").innerText =
-        enseignantsSet.size;
+    const nbEns = enseignantsSet.size;
+    document.getElementById("stat_ens").innerText = nbEns;
 
     // =========================
     // 📊 TABLEAU PAR JOUR
