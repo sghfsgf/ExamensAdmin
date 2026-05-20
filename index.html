@@ -271,11 +271,15 @@ dep.data.forEach((r, i) => {
 
     });
 
- fetch(API + "?mode=admin&feuille=Surveillances")
+fetch(API + "?mode=admin&feuille=Surveillances")
 .then(r => r.json())
 .then(surv => {
 
-    if(surv.status !== "success") return;
+    if (!surv || surv.status !== "success" || !Array.isArray(surv.data)) {
+        document.getElementById("stat_ens").innerText = "0";
+        document.getElementById("stat_taux").innerText = "0%";
+        return;
+    }
 
     // =========================
     // 👨‍🏫 ENSEIGNANTS UNIQUES
@@ -283,9 +287,9 @@ dep.data.forEach((r, i) => {
     let enseignantsSet = new Set();
 
     surv.data.forEach((r, i) => {
-        if (i > 0) {
+        if (i > 0 && r && r[1]) {
 
-            let nom = (r[1] || "")
+            let nom = r[1]
                 .toString()
                 .trim()
                 .toLowerCase();
@@ -304,7 +308,7 @@ dep.data.forEach((r, i) => {
     // =========================
     const total = surv.data.length - 1;
 
-    const max = 100; // (à améliorer plus tard si tu veux)
+    const max = 100;
 
     let taux = (total / max) * 100;
 
