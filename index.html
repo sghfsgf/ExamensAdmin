@@ -248,33 +248,14 @@ dep.data.forEach((r, i) => {
 
     });
 
-    fetch(API + "?mode=admin&feuille=Jours")
-    .then(r => r.json())
-    .then(jours => {
-
-        if(jours.status !== "success") return;
-
-        let actifs = 0;
-
-        jours.data.forEach((r,i) => {
-            if(i > 0 && (r[1] || "").toLowerCase() === "oui"){
-                actifs++;
-            }
-        });
-
-        document.getElementById("stat_jours").innerText =
-        actifs;
-
-    });
-
-let dashboardLoaded = false;
+ let dashboardLock = false;
 
 fetch(API + "?mode=admin&feuille=Surveillances")
 .then(r => r.json())
 .then(surv => {
 
-    if (!surv || !Array.isArray(surv.data) || surv.data.length === 0) {
-        console.warn("API vide ignorée (évite overwrite)");
+    if (!surv || !Array.isArray(surv.data) || surv.data.length <= 1) {
+        console.warn("API vide");
         return;
     }
 
@@ -289,9 +270,7 @@ fetch(API + "?mode=admin&feuille=Surveillances")
         let enseignant = (r[1] || "").toString().trim().toLowerCase();
         let jour = (r[3] || "").toString().trim();
 
-        if (enseignant) {
-            enseignantsSet.add(enseignant);
-        }
+        if (enseignant) enseignantsSet.add(enseignant);
 
         if (jour) {
             joursMap[jour] = (joursMap[jour] || 0) + 1;
@@ -300,13 +279,22 @@ fetch(API + "?mode=admin&feuille=Surveillances")
 
     const nbEns = enseignantsSet.size;
 
-    // 🔥 IMPORTANT : protection anti écrasement
-    if (nbEns > 0) {
-        document.getElementById("stat_ens").innerText = nbEns;
-        dashboardLoaded = true;
+    // 🔒 verrou global anti écrasement
+    if (!dashboardLock) {
+
+        dashboardLock = true;
+
+        const el = document.getElementById("stat_ens");
+
+        if (el) {
+            el.innerText = nbEns;
+        }
+
+        setTimeout(() => {
+            dashboardLock = false;
+        }, 300);
     }
 
-    // 📊 tableau jours
     let html = `
     <table style="width:100%;border-collapse:collapse;background:white;">
         <tr style="background:#eee;">
@@ -316,6 +304,7 @@ fetch(API + "?mode=admin&feuille=Surveillances")
     `;
 
     Object.keys(joursMap).forEach(j => {
+
         html += `
         <tr>
             <td style="border:1px solid #ccc;padding:5px;">${j}</td>
@@ -328,6 +317,7 @@ fetch(API + "?mode=admin&feuille=Surveillances")
     html += "</table>";
 
     document.getElementById("stat_par_jour").innerHTML = html;
+
 });
 }
     chargerDashboard();
