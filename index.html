@@ -271,22 +271,47 @@ dep.data.forEach((r, i) => {
 
     });
 
-    fetch(API + "?mode=admin&feuille=Surveillances")
-    .then(r => r.json())
-    .then(surv => {
+ fetch(API + "?mode=admin&feuille=Surveillances")
+.then(r => r.json())
+.then(surv => {
 
-        if(surv.status !== "success") return;
+    if(surv.status !== "success") return;
 
-        const total = surv.data.length - 1;
+    // =========================
+    // 👨‍🏫 ENSEIGNANTS UNIQUES
+    // =========================
+    let enseignantsSet = new Set();
 
-        const max = 100; // base simple (tu peux améliorer après)
+    surv.data.forEach((r, i) => {
+        if (i > 0) {
 
-        let taux = (total / max) * 100;
+            let nom = (r[1] || "")
+                .toString()
+                .trim()
+                .toLowerCase();
 
-        document.getElementById("stat_taux").innerText =
-        Math.min(100, Math.round(taux)) + "%";
-
+            if (nom !== "") {
+                enseignantsSet.add(nom);
+            }
+        }
     });
+
+    document.getElementById("stat_ens").innerText =
+    enseignantsSet.size;
+
+    // =========================
+    // 📊 TAUX DE REMPLISSAGE
+    // =========================
+    const total = surv.data.length - 1;
+
+    const max = 100; // (à améliorer plus tard si tu veux)
+
+    let taux = (total / max) * 100;
+
+    document.getElementById("stat_taux").innerText =
+    Math.min(100, Math.round(taux)) + "%";
+
+});
 }
     chargerDashboard();
 </script>
