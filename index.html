@@ -57,13 +57,21 @@ td[contenteditable="true"]{
 
 <body>
 
+<body>
+
+<!-- MENU -->
+<div id="menuPrincipal">
+    <button onclick="afficherAccueil()">🏠 Accueil</button>
+    <button onclick="afficherDashboard()">📊 Dashboard</button>
+</div>
+
+<!-- PAGE ACCUEIL -->
 <div id="pageAccueil">
 
     <h1 style="font-size:22px;background:#ff9800;color:white;padding:10px;border-radius:8px;">
         🏠 Accueil
     </h1>
 
-    <!-- 🔥 TU COLLES ICI TON ANCIEN BLOC -->
     <div style="display:flex;gap:15px;margin:15px 0;flex-wrap:wrap;">
 
         <div style="background:white;padding:10px 15px;border-radius:8px;min-width:180px;">
@@ -79,6 +87,19 @@ td[contenteditable="true"]{
     </div>
 
 </div>
+
+<!-- PAGE DASHBOARD -->
+<div id="dashboard" style="display:none;">
+
+    <h1 style="font-size:22px;background:#ff9800;color:white;padding:10px;border-radius:8px;">
+        📊 Dashboard
+    </h1>
+
+    <p>Graphiques et statistiques ici</p>
+
+</div>
+
+</body>
 
 <select id="feuille">
     <option value="Departements">Departements</option>
