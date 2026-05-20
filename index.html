@@ -4,10 +4,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>ExamensAdmin</title>
 
-<!-- XLSX -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
 <style>
@@ -18,16 +16,46 @@ body{
     background:#f4f4f4;
 }
 
-h1{
-    color:#222;
+/* ================= MENU ================= */
+#menuPrincipal{
+
+    background:#ffcc80;
+
+    padding:15px;
+
+    border-radius:10px;
+
+    display:flex;
+
+    gap:20px;
+
+    justify-content:flex-start; /* gauche */
+
+    align-items:center;
 }
 
-select,button{
-    padding:10px;
-    margin:5px;
-    font-size:14px;
+#menuPrincipal span{
+
+    background:#ff9800;
+
+    color:white;
+
+    font-size:22px;
+
+    font-weight:bold;
+
+    padding:8px 15px;
+
+    border-radius:8px;
+
+    cursor:pointer;
 }
 
+#menuPrincipal span:hover{
+    background:#f57c00;
+}
+
+/* ================= TABLE ================= */
 table{
     width:100%;
     border-collapse:collapse;
@@ -45,25 +73,22 @@ td[contenteditable="true"]{
     background:#fff8dc;
 }
 
-#status{
-    margin-top:10px;
-    font-weight:bold;
-    color:green;
-}
-
 </style>
 
 </head>
 
 <body>
 
-<!-- MENU -->
+<!-- ================= MENU PRINCIPAL ================= -->
 <div id="menuPrincipal">
-    <button onclick="afficherAccueil()">🏠 Accueil</button>
-    <button onclick="afficherDashboard()">📊 Dashboard</button>
+
+    <span onclick="afficherAccueil()">🏠 Accueil</span>
+
+    <span onclick="afficherDashboard()">📊 Dashboard</span>
+
 </div>
 
-<!-- PAGE ACCUEIL -->
+<!-- ================= PAGE ACCUEIL ================= -->
 <div id="pageAccueil">
 
     <h1 style="font-size:22px;background:#ff9800;color:white;padding:10px;border-radius:8px;">
@@ -84,9 +109,11 @@ td[contenteditable="true"]{
 
     </div>
 
+    <table id="tableau"></table>
+
 </div>
 
-<!-- PAGE DASHBOARD -->
+<!-- ================= PAGE DASHBOARD ================= -->
 <div id="dashboard" style="display:none;">
 
     <h1 style="font-size:22px;background:#ff9800;color:white;padding:10px;border-radius:8px;">
@@ -97,8 +124,23 @@ td[contenteditable="true"]{
 
 </div>
 
-</body>
+<!-- ================= SCRIPT ================= -->
+<script>
 
+function afficherAccueil(){
+    document.getElementById("pageAccueil").style.display = "block";
+    document.getElementById("dashboard").style.display = "none";
+}
+
+function afficherDashboard(){
+    document.getElementById("pageAccueil").style.display = "none";
+    document.getElementById("dashboard").style.display = "block";
+}
+
+</script>
+
+</body>
+</html>
 <select id="feuille">
     <option value="Departements">Departements</option>
     <option value="Jours">Jours</option>
