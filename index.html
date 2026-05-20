@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>ExamensAdmin</title>
-
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <style>
 
 body{
@@ -88,6 +88,7 @@ td[contenteditable="true"]{
 <div id="status"></div>
 
 <table id="tableau"></table>
+    <button onclick="exportExcel()">📊 Export Excel</button>
 
 <script>
 
@@ -95,7 +96,20 @@ td[contenteditable="true"]{
 // API GOOGLE APPS SCRIPT
 // ==========================
 const API = "https://script.google.com/macros/s/AKfycbyZg4xjXxVHMwezbmL3YgdBN-2vudMsaMQ_ScvSV5MsrJn5Mwk6HdRt_wROb2nFk-jc/exec";
+function exportExcel() {
+  const table = document.getElementById("examensTable");
 
+  const rows = Array.from(table.rows).filter(row => {
+    return row.style.display !== "none";
+  });
+
+  const tempTable = document.createElement("table");
+  rows.forEach(r => tempTable.appendChild(r.cloneNode(true)));
+
+  const wb = XLSX.utils.table_to_book(tempTable, { sheet: "Examens" });
+
+  XLSX.writeFile(wb, "ExamensAdmin.xlsx");
+}
 
 // ==========================
 // CONFIG FEUILLES
