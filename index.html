@@ -311,18 +311,44 @@ function chargerDashboard(){
         // 📊 PAR JOUR
         // =========================
 
-        let html = "<table style='width:100%;background:white;border-collapse:collapse;'>";
+       let html = `
+<div style="
+    margin-top:10px;
+    background:white;
+    border-radius:10px;
+    padding:10px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+">
 
-        for (let j in joursMap) {
+<table style="
+    width:100%;
+    border-collapse:collapse;
+    font-family:Arial;
+">
+    <tr style="background:#ff9800;color:white;">
+        <th style="padding:10px;text-align:left;">📅 Jour</th>
+        <th style="padding:10px;text-align:center;">📊 Nombre</th>
+    </tr>
+`;
 
-            html += `
-            <tr>
-                <td style="border:1px solid #ccc;padding:5px;">${j}</td>
-                <td style="border:1px solid #ccc;padding:5px;text-align:center;">
-                    <b>${joursMap[j]}</b>
-                </td>
-            </tr>`;
-        }
+      for (let j in joursMap) {
+
+    html += `
+    <tr style="border-bottom:1px solid #eee;">
+        <td style="padding:10px;">
+            📅 ${j}
+        </td>
+
+        <td style="
+            padding:10px;
+            text-align:center;
+            font-weight:bold;
+            color:#333;
+        ">
+            ${joursMap[j]}
+        </td>
+    </tr>`;
+}
 
         html += "</table>";
 
