@@ -239,7 +239,13 @@ function chargerDashboard(){
 
         if(dep.status !== "success") return;
 
-        const enseignants = dep.data.length - 1;
+        let enseignants = 0;
+
+dep.data.forEach((r, i) => {
+    if (i > 0) {
+        enseignants += parseInt(r[2]) || 0;
+    }
+});
 
         document.getElementById("stat_ens").innerText =
         enseignants;
