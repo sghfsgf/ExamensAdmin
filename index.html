@@ -94,6 +94,34 @@ td[contenteditable="true"]{
 
 <!-- DASHBOARD -->
 <div id="dashboard" style="display:none;">
+
+    <h1 style="font-size:22px;background:#ff9800;color:white;padding:10px;border-radius:8px;">
+        📊 Dashboard
+    </h1>
+
+    <!-- 🔥 ZONE STATISTIQUES -->
+    <div style="display:flex;gap:15px;flex-wrap:wrap;margin-top:15px;">
+
+        <div style="background:white;padding:15px;border-radius:10px;min-width:200px;">
+            👨‍🏫 Total enseignants<br>
+            <b id="dash_ens">-</b>
+        </div>
+
+        <div style="background:white;padding:15px;border-radius:10px;min-width:200px;">
+            📅 Total jours utilisés<br>
+            <b id="dash_jours">-</b>
+        </div>
+
+        <div style="background:white;padding:15px;border-radius:10px;min-width:200px;">
+            📊 Total surveillances<br>
+            <b id="dash_surveillances">-</b>
+        </div>
+
+    </div>
+
+</div>
+
+    
     <h1 style="font-size:22px;background:#ff9800;color:white;padding:10px;border-radius:8px;">
         📊 Dashboard
     </h1>
@@ -152,36 +180,7 @@ const CONFIG = {
 };
 
 /* CHARGER */
-function charger(){
-
-    const feuille = document.getElementById("feuille").value;
-
-    fetch(API + "?mode=admin&feuille=" + feuille)
-    .then(r => r.json())
-    .then(data => {
-
-        let html = "";
-
-        data.data.forEach(row => {
-
-            html += "<tr>";
-
-            for(let j = 0; j < CONFIG[feuille]; j++){
-                html += `<td contenteditable="true">${row[j] || ""}</td>`;
-            }
-
-            html += "</tr>";
-        });
-
-        document.getElementById("tableau").innerHTML = html;
-        document.getElementById("status").innerText = "✔ Chargé";
-    });
-}
-
-/* DASHBOARD */
 function chargerDashboard(){
-
-    document.getElementById("stat_ens").innerText = "0";
 
     fetch(API + "?mode=admin&feuille=Surveillances")
     .then(r => r.json())
@@ -189,22 +188,25 @@ function chargerDashboard(){
 
         let setEns = new Set();
         let jours = {};
+        let total = 0;
 
         for(let i=1;i<surv.data.length;i++){
 
             let r = surv.data[i];
-
             if(!r) continue;
 
-            setEns.add(r[1] || "");
+            let ens = (r[1] || "").trim();
+            let j = (r[3] || "").trim();
 
-            let j = r[3] || "";
+            if(ens) setEns.add(ens);
+            if(j) jours[j] = (jours[j]||0)+1;
 
-            if(j){
-                jours[j] = (jours[j]||0)+1;
-            }
+            total++;
         }
 
+        // =========================
+        // 🏠 ACCUEIL (inchangé)
+        // =========================
         document.getElementById("stat_ens").innerText = setEns.size;
 
         let html = "<table style='width:100%;background:white;'>";
@@ -213,9 +215,18 @@ function chargerDashboard(){
             html += `<tr><td>${j}</td><td>${jours[j]}</td></tr>`;
         }
 
-        html += "</table>";
-
         document.getElementById("stat_par_jour").innerHTML = html;
+
+        // =========================
+        // 📊 DASHBOARD (NOUVEAU)
+        // =========================
+        if(document.getElementById("dash_ens")){
+
+            document.getElementById("dash_ens").innerText = setEns.size;
+            document.getElementById("dash_jours").innerText = Object.keys(jours).length;
+            document.getElementById("dash_surveillances").innerText = total;
+        }
+
     });
 }
 
