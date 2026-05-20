@@ -67,12 +67,7 @@ td[contenteditable="true"]{
         <b id="stat_ens">-</b>
             </div>
 
-    <div style="background:white;padding:10px 15px;border-radius:8px;min-width:180px;">
-        📅 Jours actifs<br>
-        <b id="stat_jours">-</b>
-    </div>
-
-    <div style="background:white;padding:10px 15px;border-radius:8px;min-width:180px;">
+        <div style="background:white;padding:10px 15px;border-radius:8px;min-width:180px;">
     📊 Par jour<br>
     <b id="stat_par_jour">-</b>
 </div>
@@ -277,86 +272,67 @@ fetch(API + "?mode=admin&feuille=Surveillances")
 .then(surv => {
 
     if (!surv || surv.status !== "success" || !Array.isArray(surv.data)) {
+
         document.getElementById("stat_ens").innerText = "0";
-        document.getElementById("stat_jours").innerText = "0";
-        document.getElementById("stat_par_jour").innerText = "";
+        document.getElementById("stat_par_jour").innerHTML = "";
         return;
     }
 
     let enseignantsSet = new Set();
-    let joursMap = {}; // jour => Set enseignants
+    let joursMap = {};
 
     surv.data.forEach((r, i) => {
 
         if (i === 0 || !r) return;
 
-        let enseignant = (r[1] || "").toString().trim().toLowerCase();
-        let jour = (r[3] || "").toString().trim();
+        let enseignant = (r[1] || "").toString().trim().toLowerCase(); // Col B
+        let jour = (r[3] || "").toString().trim(); // Col D
 
-        if (enseignant !== "") {
+        // 👨‍🏫 enseignants uniques
+        if (enseignant) {
             enseignantsSet.add(enseignant);
         }
 
-        if (jour !== "") {
-
+        // 📊 compteur par jour
+        if (jour) {
             if (!joursMap[jour]) {
-                joursMap[jour] = new Set();
+                joursMap[jour] = 0;
             }
-
-            if (enseignant !== "") {
-                joursMap[jour].add(enseignant);
-            }
+            joursMap[jour]++;
         }
     });
 
     // =========================
-    // 👨‍🏫 ENSEIGNANTS UNIQUES
+    // 👨‍🏫 ENSEIGNANTS
     // =========================
     document.getElementById("stat_ens").innerText =
         enseignantsSet.size;
 
     // =========================
-    // 📅 JOURS ACTIFS
-    // =========================
-    document.getElementById("stat_jours").innerText =
-        Object.keys(joursMap).length;
-
-    // =========================
-    // 📊 CAPACITÉ PAR JOUR
+    // 📊 TABLEAU PAR JOUR
     // =========================
     let html = `
-<table style="
-    width:100%;
-    margin-top:10px;
-    border-collapse:collapse;
-    background:white;
-    font-size:14px;
-">
-
-<tr style="background:#eee;">
-    <th style="border:1px solid #ccc;padding:5px;">Jour</th>
-    <th style="border:1px solid #ccc;padding:5px;">Enseignants</th>
-</tr>
-`;
-
-Object.keys(joursMap).forEach(jour => {
-
-    html += `
-        <tr>
-            <td style="border:1px solid #ccc;padding:5px;">
-                ${jour}
-            </td>
-            <td style="border:1px solid #ccc;padding:5px;text-align:center;">
-                <b>${joursMap[jour].size}</b>
-            </td>
+    <table style="width:100%;border-collapse:collapse;background:white;">
+        <tr style="background:#eee;">
+            <th style="border:1px solid #ccc;padding:5px;">Jour</th>
+            <th style="border:1px solid #ccc;padding:5px;">Nombre</th>
         </tr>
     `;
-});
 
-html += "</table>";
+    Object.keys(joursMap).forEach(j => {
 
-document.getElementById("stat_par_jour").innerHTML = html;
+        html += `
+        <tr>
+            <td style="border:1px solid #ccc;padding:5px;">${j}</td>
+            <td style="border:1px solid #ccc;padding:5px;text-align:center;">
+                <b>${joursMap[j]}</b>
+            </td>
+        </tr>`;
+    });
 
+    html += "</table>";
+
+    document.getElementById("stat_par_jour").innerHTML = html;
 });
 }
     chargerDashboard();
