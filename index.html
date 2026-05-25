@@ -10,8 +10,21 @@
 <!-- XLSX -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
+<button onclick="showSection('examens')">📊 Examens</button>
+<button onclick="showSection('reclamations')">📩 Réclamations</button>
+    
 <style>
 
+<style>
+.section{
+  padding:15px;
+}
+button{
+  margin-right:10px;
+  cursor:pointer;
+}
+</style>
+    
 body{
     font-family:Arial;
     margin:20px;
@@ -81,7 +94,25 @@ td[contenteditable="true"]{
     </span>
 
 </div>
+<!-- SECTION EXAMENS -->
+<div id="section-examens" class="section">
+  <h2>ExamensAdmin</h2>
+  <!-- ton contenu actuel ici -->
+</div>
 
+
+<!-- SECTION RECLAMATIONS -->
+<div id="section-reclamations" class="section" style="display:none;">
+  <h2>📩 Réclamations</h2>
+
+  <div id="reclamationsContent">
+    Chargement...
+  </div>
+</div>
+
+
+
+    
 <div id="dashboard" style="display:flex;gap:15px;margin:15px 0;flex-wrap:wrap;">
 
     <div style="background:white;padding:10px 15px;border-radius:8px;min-width:180px;">
@@ -358,6 +389,63 @@ function chargerDashboard(){
 
 chargerDashboard();
 
+    function showSection(section){
+
+  document.querySelectorAll(".section").forEach(s=>{
+    s.style.display="none";
+  });
+
+  document.getElementById("section-"+section).style.display="block";
+
+  if(section === "reclamations"){
+    loadReclamations();
+  }
+}
+const URL_RECLAMATIONS = "https://script.google.com/u/0/home/projects/1tRDco6fqCUpwFceR4qWwV0ewBErhQNr0AjMKfbLICnTeg3IhNzSsQyGQ/edit";
+
+function loadReclamations(){
+
+fetch(URL_RECLAMATIONS)
+.then(r => r.json())
+.then(data => {
+
+  let html = `
+  <table border="1" style="width:100%;border-collapse:collapse;">
+    <tr style="background:#d9ecff;">
+      <th>Date</th>
+      <th>Nom</th>
+      <th>Email</th>
+      <th>Département</th>
+      <th>Type</th>
+      <th>Message</th>
+    </tr>
+  `;
+
+  data.reverse().forEach(r=>{
+    html += `
+    <tr>
+      <td>${r.Date}</td>
+      <td>${r["Nom et Prénom"]}</td>
+      <td>${r.Email}</td>
+      <td>${r.Département}</td>
+      <td>${r["Type de réclamation"]}</td>
+      <td>${r.Message}</td>
+    </tr>
+    `;
+  });
+
+  html += "</table>";
+
+  document.getElementById("reclamationsContent").innerHTML = html;
+
+})
+.catch(err=>{
+  document.getElementById("reclamationsContent").innerHTML =
+  "Erreur de chargement";
+});
+
+}
+    
 </script>
 
 </body>
