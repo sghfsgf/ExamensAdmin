@@ -13,8 +13,7 @@
 body{
     font-family:Arial;
     margin:20px;
-    background:#f4f4f
-        4;
+    background:#f4f4f4;
 }
 
 .section{
@@ -52,7 +51,9 @@ td,th{
 
 <body>
 
+<!-- ===================== -->
 <!-- MENU -->
+<!-- ===================== -->
 <div style="margin-bottom:10px;">
   <button onclick="showSection('examens')">📊 Examens</button>
   <button onclick="showSection('reclamations')">📩 Réclamations</button>
@@ -100,15 +101,15 @@ td,th{
 // =====================
 const API = "https://script.google.com/macros/s/AKfycbyZg4xjXxVHMwezbmL3YgdBN-2vudMsaMQ_ScvSV5MsrJn5Mwk6HdRt_wROb2nFk-jc/exec";
 
+
 // =====================
 // API RECLAMATIONS
-// ⚠️ REMPLACE PAR TON URL APPS SCRIPT
 // =====================
 const URL_RECLAMATIONS = "https://script.google.com/macros/s/AKfycbzmDT5PUVdkn7WgrvgYDn9VZJ8JgFM-T1foEbFBxaFnI3a4DgDv_EN6Ndc08rqjApAzcA/exec";
 
 
 // =====================
-// NAVIGATION
+// NAVIGATION (SPA)
 // =====================
 function showSection(section){
 
@@ -125,7 +126,7 @@ function showSection(section){
 
 
 // =====================
-// CHARGER EXAMENS
+// CONFIG EXAMENS
 // =====================
 const CONFIG = {
   Departements: 2,
@@ -134,6 +135,10 @@ const CONFIG = {
   Historique_Convocations: 6
 };
 
+
+// =====================
+// CHARGER EXAMENS
+// =====================
 function charger(){
 
     const feuille = document.getElementById("feuille").value;
@@ -146,9 +151,11 @@ function charger(){
 
         data.data.forEach(row=>{
             html+="<tr>";
+
             for(let i=0;i<CONFIG[feuille];i++){
-                html+=`<td contenteditable="true">${row[i]||""}</td>`;
+                html+=`<td contenteditable="true">${row[i] || ""}</td>`;
             }
+
             html+="</tr>";
         });
 
@@ -215,31 +222,31 @@ fetch(URL_RECLAMATIONS)
 
     if(!Array.isArray(data)){
         document.getElementById("reclamationsContent")
-        .innerHTML="❌ Erreur données";
+        .innerHTML="❌ Données invalides";
         return;
     }
 
     let html=`
     <table>
-    <tr style="background:#d9ecff;">
-        <th>Date</th>
-        <th>Nom</th>
-        <th>Email</th>
-        <th>Département</th>
-        <th>Type</th>
-        <th>Message</th>
-    </tr>
+        <tr style="background:#90caf9;color:white;">
+            <th>Date</th>
+            <th>Nom</th>
+            <th>Email</th>
+            <th>Département</th>
+            <th>Type</th>
+            <th>Message</th>
+        </tr>
     `;
 
     data.reverse().forEach(r=>{
         html+=`
         <tr>
-            <td>${r.Date||""}</td>
-            <td>${r["Nom et Prénom"]||""}</td>
-            <td>${r.Email||""}</td>
-            <td>${r.Département||""}</td>
-            <td>${r["Type de réclamation"]||""}</td>
-            <td>${r.Message||""}</td>
+            <td>${r.Date || ""}</td>
+            <td>${r["Nom et Prénom"] || ""}</td>
+            <td>${r.Email || ""}</td>
+            <td>${r.Département || ""}</td>
+            <td>${r["Type de réclamation"] || ""}</td>
+            <td style="text-align:left;">${r.Message || ""}</td>
         </tr>
         `;
     });
@@ -250,8 +257,9 @@ fetch(URL_RECLAMATIONS)
 
 })
 .catch(err=>{
+    console.error(err);
     document.getElementById("reclamationsContent")
-    .innerHTML="❌ Erreur chargement";
+    .innerHTML="❌ Erreur chargement API";
 });
 
 }
