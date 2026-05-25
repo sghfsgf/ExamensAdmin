@@ -215,46 +215,44 @@ function sauvegarder(){
     const rows = document.getElementById("tableau").rows;
     const feuille = document.getElementById("feuille").value;
 
-    let data=[];
+    let data = [];
 
-    for(let i=0;i<rows.length;i++){
+    for (let i = 0; i < rows.length; i++) {
 
-        let cells = rows[i].cells;
-
-        let vals = [
-            cells[0] ? cells[0].innerText : "",
-            cells[1] ? cells[1].innerText : "",
-            cells[2] ? cells[2].innerText : ""
-        ];
+        let c = rows[i].cells;
 
         data.push({
             ligne: i + 1,
-            valeurs: vals
+            valeurs: [
+                c[0]?.innerText ?? "",
+                c[1]?.innerText ?? "",
+                c[2]?.innerText ?? ""
+            ]
         });
     }
 
     const formData = new FormData();
-    formData.append("mode","admin");
-    formData.append("feuille",feuille);
-    formData.append("data",JSON.stringify(data));
+    formData.append("feuille", feuille);
+    formData.append("data", JSON.stringify(data));
 
-    fetch(API,{method:"POST",body:formData})
-    .then(r=>r.json())
-    .then(res=>{
+    fetch(API, {
+        method: "POST",
+        body: formData
+    })
+    .then(r => r.json())
+    .then(res => {
 
         const status = document.getElementById("status");
-
         status.innerText = res.message;
-        status.style.color = (res.status === "success") ? "green" : "red";
 
+        status.style.color = res.status === "success" ? "green" : "red";
     })
-    .catch(err=>{
+    .catch(() => {
         const status = document.getElementById("status");
         status.innerText = "❌ Erreur réseau";
         status.style.color = "red";
     });
-
-}
+}}
 
 
 // =====================
