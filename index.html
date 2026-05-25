@@ -234,6 +234,9 @@ function sauvegarder(){
 
     fetch(API, {
         method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
         body: new URLSearchParams({
             feuille: feuille,
             data: JSON.stringify(data)
@@ -247,7 +250,8 @@ function sauvegarder(){
         status.style.color = res.status === "success" ? "green" : "red";
 
     })
-    .catch(() => {
+    .catch(err => {
+        console.log(err);
         document.getElementById("status").innerText = "❌ Erreur réseau";
     });
 }
