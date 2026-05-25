@@ -16,42 +16,15 @@ body{
     background:#f4f4f4;
 }
 
-/* ===================== */
-/* MENU PRINCIPAL (AMÉLIORÉ) */
-/* ===================== */
-.menu{
-    background:#ffe0b2;
-    padding:12px 15px;
-    border-radius:10px;
-    margin-bottom:15px;
-    display:flex;
-    gap:10px;
-    align-items:center;
-}
-
-.menu button{
-    border:none;
-    cursor:pointer;
-    padding:8px 12px;
-    border-radius:6px;
-    background:white;
-    transition:0.2s;
-}
-
-.menu button:hover{
-    background:#ffcc80;
-}
-
-.menu button.active{
-    background:#ff9800;
-    color:white;
-    font-weight:bold;
-}
-
-/* ===================== */
 .section{
     display:none;
     padding:10px;
+}
+
+button{
+    margin-right:10px;
+    cursor:pointer;
+    padding:8px 12px;
 }
 
 table{
@@ -79,18 +52,11 @@ td,th{
 <body>
 
 <!-- ===================== -->
-<!-- MENU PRINCIPAL -->
+<!-- MENU -->
 <!-- ===================== -->
-<div class="menu">
-
-  <button class="menu-btn active" onclick="showSection('examens', this)">
-    📊 Examens
-  </button>
-
-  <button class="menu-btn" onclick="showSection('reclamations', this)">
-    📩 Réclamations
-  </button>
-
+<div style="margin-bottom:10px;">
+  <button onclick="showSection('examens')">📊 Examens</button>
+  <button onclick="showSection('reclamations')">📩 Réclamations</button>
 </div>
 
 <!-- ===================== -->
@@ -135,6 +101,7 @@ td,th{
 // =====================
 const API = "https://script.google.com/macros/s/AKfycbyZg4xjXxVHMwezbmL3YgdBN-2vudMsaMQ_ScvSV5MsrJn5Mwk6HdRt_wROb2nFk-jc/exec";
 
+
 // =====================
 // API RECLAMATIONS
 // =====================
@@ -142,23 +109,15 @@ const URL_RECLAMATIONS = "https://script.google.com/macros/s/AKfycbzmDT5PUVdkn7W
 
 
 // =====================
-// NAVIGATION (SPA) + MENU ACTIVE
+// NAVIGATION (SPA)
 // =====================
-function showSection(section, btn){
+function showSection(section){
 
     document.querySelectorAll(".section").forEach(s=>{
         s.style.display="none";
     });
 
     document.getElementById("section-"+section).style.display="block";
-
-    // reset active
-    document.querySelectorAll(".menu-btn").forEach(b=>{
-        b.classList.remove("active");
-    });
-
-    // set active
-    if(btn) btn.classList.add("active");
 
     if(section === "reclamations"){
         loadReclamations();
@@ -215,45 +174,29 @@ function sauvegarder(){
     const rows = document.getElementById("tableau").rows;
     const feuille = document.getElementById("feuille").value;
 
-    let data = [];
+    let data=[];
 
-    for (let i = 0; i < rows.length; i++) {
+    for(let i=0;i<rows.length;i++){
 
-        let c = rows[i].cells;
-        let ligne = [];
+        let vals={};
 
-        for (let j = 0; j < c.length; j++) {
-            ligne.push(c[j].innerText);
+        for(let j=0;j<CONFIG[feuille];j++){
+            vals[j]=rows[i].cells[j].innerText;
         }
 
-        data.push({
-            ligne: i + 1,
-            valeurs: ligne
-        });
+        data.push({ligne:i+1,valeurs:vals});
     }
 
-    fetch(API, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
-        },
-        body: new URLSearchParams({
-            feuille: feuille,
-            data: JSON.stringify(data)
-        })
-    })
-    .then(r => r.json())
-    .then(res => {
+    const formData = new FormData();
+    formData.append("feuille",feuille);
+    formData.append("data",JSON.stringify(data));
 
-        const status = document.getElementById("status");
-        status.innerText = res.message;
-        status.style.color = res.status === "success" ? "green" : "red";
-
-    })
-    .catch(err => {
-        console.log(err);
-        document.getElementById("status").innerText = "❌ Erreur réseau";
+    fetch(API,{method:"POST",body:formData})
+    .then(r=>r.json())
+    .then(res=>{
+        document.getElementById("status").innerText=res.message;
     });
+
 }
 
 
