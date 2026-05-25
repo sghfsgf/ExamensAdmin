@@ -16,15 +16,42 @@ body{
     background:#f4f4f4;
 }
 
+/* ===================== */
+/* MENU PRINCIPAL (AMÉLIORÉ) */
+/* ===================== */
+.menu{
+    background:#ffe0b2;
+    padding:12px 15px;
+    border-radius:10px;
+    margin-bottom:15px;
+    display:flex;
+    gap:10px;
+    align-items:center;
+}
+
+.menu button{
+    border:none;
+    cursor:pointer;
+    padding:8px 12px;
+    border-radius:6px;
+    background:white;
+    transition:0.2s;
+}
+
+.menu button:hover{
+    background:#ffcc80;
+}
+
+.menu button.active{
+    background:#ff9800;
+    color:white;
+    font-weight:bold;
+}
+
+/* ===================== */
 .section{
     display:none;
     padding:10px;
-}
-
-button{
-    margin-right:10px;
-    cursor:pointer;
-    padding:8px 12px;
 }
 
 table{
@@ -52,11 +79,18 @@ td,th{
 <body>
 
 <!-- ===================== -->
-<!-- MENU -->
+<!-- MENU PRINCIPAL -->
 <!-- ===================== -->
-<div style="margin-bottom:10px;">
-  <button onclick="showSection('examens')">📊 Examens</button>
-  <button onclick="showSection('reclamations')">📩 Réclamations</button>
+<div class="menu">
+
+  <button class="menu-btn active" onclick="showSection('examens', this)">
+    📊 Examens
+  </button>
+
+  <button class="menu-btn" onclick="showSection('reclamations', this)">
+    📩 Réclamations
+  </button>
+
 </div>
 
 <!-- ===================== -->
@@ -101,7 +135,6 @@ td,th{
 // =====================
 const API = "https://script.google.com/macros/s/AKfycbyZg4xjXxVHMwezbmL3YgdBN-2vudMsaMQ_ScvSV5MsrJn5Mwk6HdRt_wROb2nFk-jc/exec";
 
-
 // =====================
 // API RECLAMATIONS
 // =====================
@@ -109,15 +142,23 @@ const URL_RECLAMATIONS = "https://script.google.com/macros/s/AKfycbzmDT5PUVdkn7W
 
 
 // =====================
-// NAVIGATION (SPA)
+// NAVIGATION (SPA) + MENU ACTIVE
 // =====================
-function showSection(section){
+function showSection(section, btn){
 
     document.querySelectorAll(".section").forEach(s=>{
         s.style.display="none";
     });
 
     document.getElementById("section-"+section).style.display="block";
+
+    // reset active
+    document.querySelectorAll(".menu-btn").forEach(b=>{
+        b.classList.remove("active");
+    });
+
+    // set active
+    if(btn) btn.classList.add("active");
 
     if(section === "reclamations"){
         loadReclamations();
