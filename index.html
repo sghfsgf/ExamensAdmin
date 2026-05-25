@@ -220,11 +220,10 @@ function sauvegarder(){
     for (let i = 0; i < rows.length; i++) {
 
         let c = rows[i].cells;
-
         let ligne = [];
 
         for (let j = 0; j < c.length; j++) {
-            ligne.push(c[j]?.innerText ?? "");
+            ligne.push(c[j].innerText);
         }
 
         data.push({
@@ -233,26 +232,23 @@ function sauvegarder(){
         });
     }
 
-    const formData = new FormData();
-    formData.append("feuille", feuille);
-    formData.append("data", JSON.stringify(data));
-
     fetch(API, {
         method: "POST",
-        body: formData
+        body: new URLSearchParams({
+            feuille: feuille,
+            data: JSON.stringify(data)
+        })
     })
     .then(r => r.json())
     .then(res => {
 
         const status = document.getElementById("status");
         status.innerText = res.message;
-
         status.style.color = res.status === "success" ? "green" : "red";
+
     })
     .catch(() => {
-        const status = document.getElementById("status");
-        status.innerText = "❌ Erreur réseau";
-        status.style.color = "red";
+        document.getElementById("status").innerText = "❌ Erreur réseau";
     });
 }
 
