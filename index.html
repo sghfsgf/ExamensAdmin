@@ -181,35 +181,26 @@ function sauvegarder(){
         let vals = {};
 
         for(let j=0;j<CONFIG[feuille];j++){
-            vals[j] = rows[i].cells[j].innerText;
+            vals[j+1] = rows[i].cells[j].innerText;
         }
 
-        data.push({
-            ligne: i + 1,
-            valeurs: vals
-        });
+        data.push({ligne:i+1, valeurs:vals});
     }
 
-    const formData = new FormData();
-    formData.append("feuille", feuille);
-    formData.append("data", JSON.stringify(data));
-    formData.append("formType", "surveillance"); // 🔥 AJOUT
-
-    fetch(API, {
-        method: "POST",
-        body: formData   // 🔥 IMPORTANT : PAS de headers JSON
+    fetch(API,{
+        method:"POST",
+        body: new URLSearchParams({
+            mode:"admin",
+            feuille:feuille,
+            data:JSON.stringify(data)
+        })
     })
-    .then(r => r.json())
-    .then(res => {
-
-        const status = document.getElementById("status");
-        status.innerText = res.message;
-
-        status.style.color = res.status === "success" ? "green" : "red";
-    })
-    .catch(() => {
-        document.getElementById("status").innerText = "❌ Erreur réseau";
+    .then(r=>r.json())
+    .then(res=>{
+        document.getElementById("status").innerText =
+        res.status==="success" ? "✔ OK" : "❌ erreur";
     });
+
 }
 
 
