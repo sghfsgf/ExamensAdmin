@@ -221,13 +221,15 @@ function sauvegarder(){
 
         let c = rows[i].cells;
 
+        let ligne = [];
+
+        for (let j = 0; j < c.length; j++) {
+            ligne.push(c[j]?.innerText ?? "");
+        }
+
         data.push({
             ligne: i + 1,
-            valeurs: [
-                c[0]?.innerText ?? "",
-                c[1]?.innerText ?? "",
-                c[2]?.innerText ?? ""
-            ]
+            valeurs: ligne
         });
     }
 
@@ -252,7 +254,7 @@ function sauvegarder(){
         status.innerText = "❌ Erreur réseau";
         status.style.color = "red";
     });
-}}
+}
 
 
 // =====================
