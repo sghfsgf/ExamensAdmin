@@ -219,40 +219,40 @@ function sauvegarder(){
 
     for(let i=0;i<rows.length;i++){
 
-        let vals={};
+        let cells = rows[i].cells;
 
-        for(let j=0;j<CONFIG[feuille];j++){
-            vals[j]=rows[i].cells[j].innerText;
-        }
+        let vals = [
+            cells[0] ? cells[0].innerText : "",
+            cells[1] ? cells[1].innerText : "",
+            cells[2] ? cells[2].innerText : ""
+        ];
 
-        data.push({ligne:i+1,valeurs:vals});
+        data.push({
+            ligne: i + 1,
+            valeurs: vals
+        });
     }
 
     const formData = new FormData();
-    formData.append("mode","admin"); // 🔥 IMPORTANT (corrige ton erreur)
+    formData.append("mode","admin");
     formData.append("feuille",feuille);
     formData.append("data",JSON.stringify(data));
 
     fetch(API,{method:"POST",body:formData})
-.then(r=>r.json())
-.then(res=>{
+    .then(r=>r.json())
+    .then(res=>{
 
-    const status = document.getElementById("status");
+        const status = document.getElementById("status");
 
-    status.innerText = res.message;
+        status.innerText = res.message;
+        status.style.color = (res.status === "success") ? "green" : "red";
 
-    if(res.status === "success"){
-        status.style.color = "green";
-    } else {
+    })
+    .catch(err=>{
+        const status = document.getElementById("status");
+        status.innerText = "❌ Erreur réseau";
         status.style.color = "red";
-    }
-
-})
-.catch(err=>{
-    const status = document.getElementById("status");
-    status.innerText = "❌ Erreur réseau";
-    status.style.color = "red";
-});
+    });
 
 }
 
