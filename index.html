@@ -234,10 +234,25 @@ function sauvegarder(){
     formData.append("data",JSON.stringify(data));
 
     fetch(API,{method:"POST",body:formData})
-    .then(r=>r.json())
-    .then(res=>{
-        document.getElementById("status").innerText=res.message;
-    });
+.then(r=>r.json())
+.then(res=>{
+
+    const status = document.getElementById("status");
+
+    status.innerText = res.message;
+
+    if(res.status === "success"){
+        status.style.color = "green";
+    } else {
+        status.style.color = "red";
+    }
+
+})
+.catch(err=>{
+    const status = document.getElementById("status");
+    status.innerText = "❌ Erreur réseau";
+    status.style.color = "red";
+});
 
 }
 
