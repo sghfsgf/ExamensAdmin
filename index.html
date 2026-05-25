@@ -174,29 +174,41 @@ function sauvegarder(){
     const rows = document.getElementById("tableau").rows;
     const feuille = document.getElementById("feuille").value;
 
-    let data=[];
+    let data = [];
 
     for(let i=0;i<rows.length;i++){
 
-        let vals={};
+        let vals = {};
 
         for(let j=0;j<CONFIG[feuille];j++){
-            vals[j]=rows[i].cells[j].innerText;
+            vals[j] = rows[i].cells[j].innerText;
         }
 
-        data.push({ligne:i+1,valeurs:vals});
+        data.push({
+            ligne: i + 1,
+            valeurs: vals
+        });
     }
 
     const formData = new FormData();
-    formData.append("feuille",feuille);
-    formData.append("data",JSON.stringify(data));
+    formData.append("feuille", feuille);
+    formData.append("data", JSON.stringify(data));
 
-    fetch(API,{method:"POST",body:formData})
-    .then(r=>r.json())
-    .then(res=>{
-        document.getElementById("status").innerText=res.message;
+    fetch(API, {
+        method: "POST",
+        body: formData   // 🔥 IMPORTANT : PAS de headers JSON
+    })
+    .then(r => r.json())
+    .then(res => {
+
+        const status = document.getElementById("status");
+        status.innerText = res.message;
+
+        status.style.color = res.status === "success" ? "green" : "red";
+    })
+    .catch(() => {
+        document.getElementById("status").innerText = "❌ Erreur réseau";
     });
-
 }
 
 
