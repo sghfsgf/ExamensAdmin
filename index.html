@@ -4,58 +4,40 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>ExamensAdmin</title>
 
-<!-- XLSX -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
-<button onclick="showSection('examens')">📊 Examens</button>
-<button onclick="showSection('reclamations')">📩 Réclamations</button>
-    
 <style>
 
-<style>
-.section{
-  padding:15px;
-}
-button{
-  margin-right:10px;
-  cursor:pointer;
-}
-</style>
-    
 body{
     font-family:Arial;
     margin:20px;
     background:#f4f4f4;
 }
 
-h1{
-    color:#222;
+.section{
+    display:none;
+    padding:10px;
 }
 
-select,button{
-    padding:10px;
-    margin:5px;
-    font-size:14px;
+button{
+    margin-right:10px;
+    cursor:pointer;
+    padding:8px 12px;
 }
 
 table{
     width:100%;
     border-collapse:collapse;
     background:white;
-    margin-top:20px;
+    margin-top:15px;
 }
 
-td{
+td,th{
     border:1px solid #999;
     padding:6px;
     text-align:center;
-}
-
-td[contenteditable="true"]{
-    background:#fff8dc;
 }
 
 #status{
@@ -65,67 +47,22 @@ td[contenteditable="true"]{
 }
 
 </style>
-
 </head>
 
 <body>
 
-<!-- MENU PRINCIPAL -->
-<div style="
-    background:#ffcc80;
-    padding:12px 15px;
-    border-radius:10px;
-    margin-bottom:15px;
-    display:flex;
-    justify-content:flex-start;
-    align-items:center;
-">
-
-    <span style="
-        font-size:18px;
-        font-weight:bold;
-        color:white;
-        background:#ff9800;
-        padding:6px 12px;
-        border-radius:8px;
-        display:inline-block;
-    ">
-        📊 ExamensAdmin
-    </span>
-
+<!-- MENU -->
+<div style="margin-bottom:10px;">
+  <button onclick="showSection('examens')">📊 Examens</button>
+  <button onclick="showSection('reclamations')">📩 Réclamations</button>
 </div>
+
+<!-- ===================== -->
 <!-- SECTION EXAMENS -->
-<div id="section-examens" class="section">
-  <h2>ExamensAdmin</h2>
-  <!-- ton contenu actuel ici -->
-</div>
+<!-- ===================== -->
+<div id="section-examens" class="section" style="display:block;">
 
-
-<!-- SECTION RECLAMATIONS -->
-<div id="section-reclamations" class="section" style="display:none;">
-  <h2>📩 Réclamations</h2>
-
-  <div id="reclamationsContent">
-    Chargement...
-  </div>
-</div>
-
-
-
-    
-<div id="dashboard" style="display:flex;gap:15px;margin:15px 0;flex-wrap:wrap;">
-
-    <div style="background:white;padding:10px 15px;border-radius:8px;min-width:180px;">
-        👨‍🏫 Enseignants<br>
-        <b id="stat_ens">-</b>
-    </div>
-
-    <div style="background:white;padding:10px 15px;border-radius:8px;min-width:180px;">
-        📊 Par jour<br>
-        <b id="stat_par_jour">-</b>
-    </div>
-
-</div>
+<h2>📊 ExamensAdmin</h2>
 
 <select id="feuille">
     <option value="Departements">Departements</option>
@@ -138,53 +75,57 @@ td[contenteditable="true"]{
 <button onclick="sauvegarder()">💾 Enregistrer</button>
 <button onclick="exportExcel()">📊 Export Excel</button>
 
-<!-- 🔴 STATUS -->
 <div id="status"></div>
 
-<!-- 🔴 TABLE PRINCIPALE -->
 <table id="tableau"></table>
+
+</div>
+
+<!-- ===================== -->
+<!-- SECTION RECLAMATIONS -->
+<!-- ===================== -->
+<div id="section-reclamations" class="section">
+
+<h2>📩 Réclamations</h2>
+
+<div id="reclamationsContent">Chargement...</div>
+
+</div>
 
 <script>
 
-// ==========================
-// API GOOGLE APPS SCRIPT
-// ==========================
+// =====================
+// API EXAMENS
+// =====================
 const API = "https://script.google.com/macros/s/AKfycbyZg4xjXxVHMwezbmL3YgdBN-2vudMsaMQ_ScvSV5MsrJn5Mwk6HdRt_wROb2nFk-jc/exec";
 
+// =====================
+// API RECLAMATIONS
+// ⚠️ REMPLACE PAR TON URL APPS SCRIPT
+// =====================
+const URL_RECLAMATIONS = "https://script.google.com/macros/s/AKfycbwOixmjkZYGU7YcrSz2F1_BJ6BltRH5l20i4-jD5dvHGfuVdTcpqLnBE0-EbSE641ECcg/exec";
 
-// ==========================
-// EXPORT EXCEL (CORRIGÉ)
-// ==========================
-function exportExcel() {
 
-  const table = document.getElementById("tableau"); // ✅ CORRECT
+// =====================
+// NAVIGATION
+// =====================
+function showSection(section){
 
-  if (!table || table.rows.length === 0) {
-    alert("Aucune donnée à exporter !");
-    return;
-  }
+    document.querySelectorAll(".section").forEach(s=>{
+        s.style.display="none";
+    });
 
-  const rows = Array.from(table.rows).filter(row => {
-    return row.style.display !== "none";
-  });
+    document.getElementById("section-"+section).style.display="block";
 
-  const tempTable = document.createElement("table");
-  rows.forEach(r => tempTable.appendChild(r.cloneNode(true)));
-
-  const wb = XLSX.utils.table_to_book(tempTable, { sheet: "Examens" });
-
-  const fileName =
-    "ExamensAdmin_" +
-    new Date().toISOString().slice(0,10) +
-    ".xlsx";
-
-  XLSX.writeFile(wb, fileName);
+    if(section === "reclamations"){
+        loadReclamations();
+    }
 }
 
 
-// ==========================
-// CONFIG FEUILLES
-// ==========================
+// =====================
+// CHARGER EXAMENS
+// =====================
 const CONFIG = {
   Departements: 2,
   Jours: 3,
@@ -192,260 +133,128 @@ const CONFIG = {
   Historique_Convocations: 6
 };
 
-
-// ==========================
-// CHARGER DONNÉES
-// ==========================
 function charger(){
 
     const feuille = document.getElementById("feuille").value;
 
-    fetch(API + "?mode=admin&feuille=" + encodeURIComponent(feuille))
-    .then(r => r.json())
-    .then(data => {
+    fetch(API + "?mode=admin&feuille=" + feuille)
+    .then(r=>r.json())
+    .then(data=>{
 
-        if (data.status !== "success") {
-            document.getElementById("status").innerText =
-            "❌ " + data.message;
-            return;
-        }
+        let html="";
 
-        const maxCols = CONFIG[feuille];
-        let html = "";
-
-        data.data.forEach(row => {
-
-            html += "<tr>";
-
-            for(let j = 0; j < maxCols; j++){
-                html += `<td contenteditable="true">${row[j] || ""}</td>`;
+        data.data.forEach(row=>{
+            html+="<tr>";
+            for(let i=0;i<CONFIG[feuille];i++){
+                html+=`<td contenteditable="true">${row[i]||""}</td>`;
             }
-
-            html += "</tr>";
+            html+="</tr>";
         });
 
-        document.getElementById("tableau").innerHTML = html;
+        document.getElementById("tableau").innerHTML=html;
 
-        document.getElementById("status").innerText =
-        "✔ Données chargées";
-    })
-    .catch(err => {
-        console.error(err);
-        document.getElementById("status").innerText =
-        "❌ Erreur chargement API";
     });
+
 }
 
 
-// ==========================
+// =====================
 // SAUVEGARDER
-// ==========================
+// =====================
 function sauvegarder(){
 
-    const feuille = document.getElementById("feuille").value;
     const rows = document.getElementById("tableau").rows;
-    const maxCols = CONFIG[feuille];
+    const feuille = document.getElementById("feuille").value;
 
-    let dataToSend = [];
+    let data=[];
 
-    for(let i = 0; i < rows.length; i++){
+    for(let i=0;i<rows.length;i++){
 
-        let valeurs = {};
+        let vals={};
 
-        for(let j = 0; j < maxCols; j++){
-
-            valeurs[j + 1] =
-            rows[i].cells[j]
-            ? rows[i].cells[j].innerText.trim()
-            : "";
+        for(let j=0;j<CONFIG[feuille];j++){
+            vals[j]=rows[i].cells[j].innerText;
         }
 
-        dataToSend.push({
-            ligne: i + 1,
-            valeurs: valeurs
-        });
+        data.push({ligne:i+1,valeurs:vals});
     }
 
     const formData = new FormData();
+    formData.append("feuille",feuille);
+    formData.append("data",JSON.stringify(data));
 
-    formData.append("mode", "admin");
-    formData.append("feuille", feuille);
-    formData.append("data", JSON.stringify(dataToSend));
-
-    fetch(API, {
-        method: "POST",
-        body: formData
-    })
-    .then(r => r.json())
-    .then(res => {
-
-        document.getElementById("status").innerText =
-        res.status === "success"
-        ? "✔ Sauvegarde réussie"
-        : "❌ " + res.message;
-
-    })
-    .catch(err => {
-
-        console.error(err);
-
-        document.getElementById("status").innerText =
-        "❌ Erreur réseau";
+    fetch(API,{method:"POST",body:formData})
+    .then(r=>r.json())
+    .then(res=>{
+        document.getElementById("status").innerText=res.message;
     });
+
 }
 
 
-// ==========================
-// DASHBOARD
-// ==========================
-function chargerDashboard(){
+// =====================
+// EXPORT EXCEL
+// =====================
+function exportExcel(){
 
-    // ✅ afficher 0 au début
-    document.getElementById("stat_ens").innerText = "0";
-
-    fetch(API + "?mode=admin&feuille=Surveillances")
-    .then(r => r.json())
-    .then(surv => {
-
-        if (!surv || !Array.isArray(surv.data)) return;
-
-        let enseignantsSet = new Set();
-        let joursMap = {};
-
-        for (let i = 1; i < surv.data.length; i++) {
-
-            let r = surv.data[i];
-            if (!r) continue;
-
-            let enseignant = (r[1] || "")
-                .toString()
-                .trim();
-
-            let jour = (r[3] || "")
-                .toString()
-                .trim();
-
-            if (enseignant !== "") {
-                enseignantsSet.add(enseignant);
-            }
-
-            if (jour) {
-                joursMap[jour] = (joursMap[jour] || 0) + 1;
-            }
-        }
-
-        // ✅ valeur finale réelle
-        document.getElementById("stat_ens").innerText =
-            enseignantsSet.size;
-
-        // =========================
-        // 📊 PAR JOUR
-        // =========================
-
-       let html = `
-<div style="
-    margin-top:10px;
-    background:white;
-    border-radius:10px;
-    padding:10px;
-    box-shadow:0 2px 8px rgba(0,0,0,0.1);
-">
-
-<table style="
-    width:100%;
-    border-collapse:collapse;
-    font-family:Arial;
-">
-    <tr style="background:#90caf9;color:white;">
-        <th style="padding:10px;text-align:left;">📅 Jour</th>
-        <th style="padding:10px;text-align:center;">📊 Nombre</th>
-    </tr>
-`;
-
-      for (let j in joursMap) {
-
-    html += `
-    <tr style="border-bottom:1px solid #eee;">
-        <td style="padding:10px;">
-            >> ${j}
-        </td>
-
-        <td style="
-            padding:10px;
-            text-align:center;
-            font-weight:bold;
-            color:#333;
-        ">
-            ${joursMap[j]}
-        </td>
-    </tr>`;
+    const table=document.getElementById("tableau");
+    const wb=XLSX.utils.table_to_book(table,{sheet:"Examens"});
+    XLSX.writeFile(wb,"Examens.xlsx");
 }
 
-        html += "</table>";
 
-        document.getElementById("stat_par_jour").innerHTML = html;
-    });
-}
-
-chargerDashboard();
-
-    function showSection(section){
-
-  document.querySelectorAll(".section").forEach(s=>{
-    s.style.display="none";
-  });
-
-  document.getElementById("section-"+section).style.display="block";
-
-  if(section === "reclamations"){
-    loadReclamations();
-  }
-}
-const URL_RECLAMATIONS = "https://script.google.com/u/0/home/projects/1tRDco6fqCUpwFceR4qWwV0ewBErhQNr0AjMKfbLICnTeg3IhNzSsQyGQ/edit";
-
+// =====================
+// RECLAMATIONS
+// =====================
 function loadReclamations(){
 
 fetch(URL_RECLAMATIONS)
-.then(r => r.json())
-.then(data => {
+.then(r=>r.json())
+.then(data=>{
 
-  let html = `
-  <table border="1" style="width:100%;border-collapse:collapse;">
+    if(!Array.isArray(data)){
+        document.getElementById("reclamationsContent")
+        .innerHTML="❌ Erreur données";
+        return;
+    }
+
+    let html=`
+    <table>
     <tr style="background:#d9ecff;">
-      <th>Date</th>
-      <th>Nom</th>
-      <th>Email</th>
-      <th>Département</th>
-      <th>Type</th>
-      <th>Message</th>
-    </tr>
-  `;
-
-  data.reverse().forEach(r=>{
-    html += `
-    <tr>
-      <td>${r.Date}</td>
-      <td>${r["Nom et Prénom"]}</td>
-      <td>${r.Email}</td>
-      <td>${r.Département}</td>
-      <td>${r["Type de réclamation"]}</td>
-      <td>${r.Message}</td>
+        <th>Date</th>
+        <th>Nom</th>
+        <th>Email</th>
+        <th>Département</th>
+        <th>Type</th>
+        <th>Message</th>
     </tr>
     `;
-  });
 
-  html += "</table>";
+    data.reverse().forEach(r=>{
+        html+=`
+        <tr>
+            <td>${r.Date||""}</td>
+            <td>${r["Nom et Prénom"]||""}</td>
+            <td>${r.Email||""}</td>
+            <td>${r.Département||""}</td>
+            <td>${r["Type de réclamation"]||""}</td>
+            <td>${r.Message||""}</td>
+        </tr>
+        `;
+    });
 
-  document.getElementById("reclamationsContent").innerHTML = html;
+    html+="</table>";
+
+    document.getElementById("reclamationsContent").innerHTML=html;
 
 })
 .catch(err=>{
-  document.getElementById("reclamationsContent").innerHTML =
-  "Erreur de chargement";
+    document.getElementById("reclamationsContent")
+    .innerHTML="❌ Erreur chargement";
 });
 
 }
-    
+
 </script>
 
 </body>
