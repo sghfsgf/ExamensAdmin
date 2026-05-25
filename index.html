@@ -229,6 +229,7 @@ function sauvegarder(){
     }
 
     const formData = new FormData();
+    formData.append("mode","admin"); // 🔥 IMPORTANT (corrige ton erreur)
     formData.append("feuille",feuille);
     formData.append("data",JSON.stringify(data));
 
