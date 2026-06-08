@@ -256,12 +256,18 @@ function exportExcel(){
 function loadReclamations(){
 
 fetch(URL_RECLAMATIONS)
-.then(r=>r.json())
-.then(data=>{
+.then(r => {
+    if(!r.ok) throw new Error("HTTP " + r.status);
+    return r.json();
+})
+.then(res => {
+
+    // 🔥 IMPORTANT : ton API renvoie {status, data}
+    const data = res.data;
 
     if(!Array.isArray(data)){
         document.getElementById("reclamationsContent")
-        .innerHTML="❌ Données invalides";
+        .innerHTML = "❌ Données invalides";
         return;
     }
 
@@ -292,13 +298,13 @@ fetch(URL_RECLAMATIONS)
 
     html+="</table>";
 
-    document.getElementById("reclamationsContent").innerHTML=html;
+    document.getElementById("reclamationsContent").innerHTML = html;
 
 })
 .catch(err=>{
     console.error(err);
     document.getElementById("reclamationsContent")
-    .innerHTML="❌ Erreur chargement API";
+    .innerHTML = "❌ Erreur chargement API";
 });
 
 }
