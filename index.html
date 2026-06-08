@@ -173,8 +173,16 @@ function sauvegarder(){
 
     const rows = document.getElementById("tableau").rows;
     const feuille = document.getElementById("feuille").value;
+    const status = document.getElementById("status");
+    const btn = document.getElementById("btnSave"); // si tu as un bouton (sinon enlève)
 
     let data = [];
+
+    // message temporaire
+    status.innerText = "⏳ Enregistrement...";
+
+    // désactiver bouton pour éviter double clic
+    if(btn) btn.disabled = true;
 
     for(let i=0;i<rows.length;i++){
 
@@ -195,14 +203,41 @@ function sauvegarder(){
             data:JSON.stringify(data)
         })
     })
-    .then(r=>r.json())
-    .then(res=>{
-        document.getElementById("status").innerText =
-        res.status==="success" ? "✔ OK" : "❌ erreur";
+    .then(async r => {
+        if(!r.ok) throw new Error("HTTP " + r.status);
+        return r.json();
+    })
+    .then(res => {
+
+        if(res.status === "success"){
+            status.innerText = "✔ OK";
+
+            setTimeout(() => {
+                status.innerText = "";
+            }, 2500);
+
+        } else {
+            status.innerText = "❌ erreur";
+
+            setTimeout(() => {
+                status.innerText = "";
+            }, 3000);
+        }
+
+    })
+    .catch(err => {
+        console.error(err);
+        status.innerText = "❌ Erreur chargement API";
+
+        setTimeout(() => {
+            status.innerText = "";
+        }, 3000);
+    })
+    .finally(() => {
+        if(btn) btn.disabled = false;
     });
 
 }
-
 
 // =====================
 // EXPORT EXCEL
